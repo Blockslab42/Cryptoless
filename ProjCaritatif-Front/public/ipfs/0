@@ -1,0 +1,9 @@
+{
+    "name": "nft 0",
+    "description": "description 0",
+    "image": "ipfs://QmUEindQXxyGMMdkCCZ5495AKg6sy7rsgpxB2w25AjjdKW/0.jpg",
+    "animation_url":"ipfs://QmUfKwXuXaKeVrkq8nmVVPjmeG1biqFHoepZGMt67rnj6E/index.html?id=0",
+    "animation_details": { "format": "HTML" },
+    "edition": 0,
+    "compiler": "ABRAXAS"
+}

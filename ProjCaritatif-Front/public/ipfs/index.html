@@ -1,0 +1,88 @@
+<style>
+    html {
+        width: 500px;
+        height: 500px;
+        margin: 0;
+    }
+    body {
+        margin: 0;
+        
+    }
+    .container {
+        width: 300px;
+        height: 300px;
+        position: relative;
+        text-align: center;
+    }
+    img {
+        width: 100%;
+        height: 100%;
+      aspect-ratio: 1/1;
+    }
+    .centered {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    p{
+        margin: 0;
+        font-size: 40px;
+        font-weight: 800;
+        color: rgb(166, 177, 226);
+        white-space: nowrap;
+    }
+</style>
+
+<html>
+    <head></head>
+    <body>
+        <div class="container">
+            <p class="centered" id="price"></p>
+            <img id="image" src="">
+        </div>
+        
+    </body>
+</html>
+
+<script>
+    const img = ["https://ipfs.io/ipfs/QmUEindQXxyGMMdkCCZ5495AKg6sy7rsgpxB2w25AjjdKW/0.jpg",
+    "https://ipfs.io/ipfs/QmUEindQXxyGMMdkCCZ5495AKg6sy7rsgpxB2w25AjjdKW/1.jpg", 
+    "https://ipfs.io/ipfs/QmUEindQXxyGMMdkCCZ5495AKg6sy7rsgpxB2w25AjjdKW/2.jpg",  
+    "https://ipfs.io/ipfs/QmUEindQXxyGMMdkCCZ5495AKg6sy7rsgpxB2w25AjjdKW/3.jpg", 
+    "https://ipfs.io/ipfs/QmUEindQXxyGMMdkCCZ5495AKg6sy7rsgpxB2w25AjjdKW/4.jpg", 
+    "https://ipfs.io/ipfs/QmUEindQXxyGMMdkCCZ5495AKg6sy7rsgpxB2w25AjjdKW/5.jpg"]
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const data = urlParams.get('id');
+
+    const id = parseInt(data);
+    let urlImage = ""
+    if (id < img.length && id >= 0)
+    {
+        urlImage = img[id]
+    }
+    else if (id >= img.length)
+    {
+        let newId = id
+        while(newId >= img.length)
+        {
+            newId -= img.length
+        }
+        urlImage = img[newId]
+    }
+    const imgHtml = document.getElementById("image").src = urlImage;
+    // while (id / i == )
+    // {
+    //     i ++;
+    // }
+
+
+    const oui = fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
+        .then(function(response) {
+            return response.json();})
+                .then(function(myBlob) {
+                    document.getElementById("price").innerHTML = myBlob.ethereum.usd + " $"
+        });
+</script>

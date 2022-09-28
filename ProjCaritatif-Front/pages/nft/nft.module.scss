@@ -1,0 +1,38 @@
+.allNft{   
+    width: 300px;
+    margin: auto;
+    margin-top: 25%;  
+    background-color: white;
+    border-radius: 10px;
+    color: black;
+    padding-bottom: 5px;
+    transition: 0.5s;
+    
+    box-shadow: rgba(255, 255, 255, 0.4) 0px 5px 29px 0px;
+    
+}
+.allNft:hover {
+
+    transform: scale(1.01);
+    box-shadow: rgba(255, 255, 255, 0.5) 0px 5px 29px 0px;
+}
+
+.image{
+    aspect-ratio: 1 / 1;
+    border-radius: 10px 10px 0px 0px; 
+}
+
+.iframe{
+    
+    border: none;
+    top: 0; right: 0;
+    bottom: 0; left: 0;
+    width: 300px;
+    height: 300px;
+    border-radius: 10px 10px 0px 0px; 
+}
+
+.text{
+    color: black;
+    margin: 5px
+}
