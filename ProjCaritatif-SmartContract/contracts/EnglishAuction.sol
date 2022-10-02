@@ -7,14 +7,14 @@ import "erc721a/contracts/ERC721A.sol";
 
 import "hardhat/console.sol";
 
-contract EnglishAuction{
+contract EnglishAuction {
     event Start();
-    event Bid(address indexed sender, uint amount);
-    event Withdraw(address indexed bidder, uint amount);
-    event End(address highestBidder, uint amount);
+    event Bid(address indexed sender, uint256 amount);
+    event Withdraw(address indexed bidder, uint256 amount);
+    event End(address highestBidder, uint256 amount);
 
     ERC721A public immutable nft;
-    uint public immutable nftId;
+    uint256 public immutable nftId;
 
     address payable public immutable seller;
     uint32 public duration;
@@ -23,68 +23,69 @@ contract EnglishAuction{
     bool public ended;
 
     address public highestBidder;
-    uint public highestBid;
-    mapping(address => uint) public bids;
+    uint256 public highestBid;
+    mapping(address => uint256) public bids;
 
-    constructor( address _nft, uint _nftId, uint _startingBid, uint32 _duration){
+    constructor(
+        address _nft,
+        uint256 _nftId,
+        uint256 _startingBid
+    ) {
         nft = ERC721A(_nft);
         nftId = _nftId;
         seller = payable(msg.sender);
-        duration = _duration;
         highestBid = _startingBid;
     }
 
-    function startAuction() external{
+    /// @dev seller needs to approve contract beforehand to allow it to transfer the nft on his behalf
+    function startAuction(uint32 duration) external {
         require(msg.sender == seller, "not seller");
         require(!started, "started");
         started = true;
         endAt = uint32(block.timestamp + duration);
-        //seller
-        nft.transferFrom(msg.sender, address(this), nftId);
+        //nft.transferFrom(msg.sender, address(this), nftId);
+        // useless to transfer twice, just transfer at settlement
 
         emit Start();
     }
 
-    function bid() external payable{
+    function bid() external payable {
         require(started, "not started");
         require(block.timestamp < endAt, "ended");
         require(msg.value > highestBid, "value < highest bid");
-        
-        if (highestBidder != address(0))
-        {
-            bids[highestBidder] += highestBid;
-        }
-        
+
         highestBid = msg.value;
         highestBidder = msg.sender;
+        //we need to set highestBidder before highestBid
+        if (highestBidder != address(0)) {
+            bids[highestBidder] += highestBid;
+        }
 
         emit Bid(msg.sender, msg.value);
     }
 
-    function withdraw() external{
-        uint bal = bids[msg.sender];
+    function withdraw() external {
+        //prevent highest bidder to default on his bid after auction is ended
+        require(!ended || highestBidder != msg.sender, "ended");
+        uint256 bal = bids[msg.sender];
         bids[msg.sender] = 0;
         payable(msg.sender).transfer(bal);
         emit Withdraw(msg.sender, bal);
     }
 
-    function end() external{
+    function end() external {
+        require(msg.sender == seller, "not seller");
         require(started, "not started");
         require(!ended, "ended");
         require(block.timestamp >= endAt, "not ended");
 
         ended = true;
 
-        if (highestBidder != address(0))
-        {
-            nft.transferFrom(address(this), highestBidder, nftId);
+        if (highestBidder != address(0)) {
+            nft.transferFrom(seller, highestBidder, nftId); //transfer from seller instead
             seller.transfer(highestBid);
-        }   
-        else{
-            nft.transferFrom(address(this), seller, nftId);
-        }   
+        }
 
         emit End(highestBidder, highestBid);
     }
-
 }
