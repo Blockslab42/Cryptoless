@@ -95,7 +95,18 @@ describe('nft contract', function () {
                     value: 1,
                 })
             );
-            await expect(await contract.totalSupply()).to.equal(27);
+            await expect(await contract.totalSupply()).to.equal(9);
+        });
+        it('Should return correct tokenURI', async function () {
+            await expect(
+                await contract.connect(addr2).mintNFT(9, 111, {
+                    value: 1,
+                })
+            );
+
+            await contract.setURI('uri.com/');
+
+            await expect(await contract.tokenURI(0)).to.equal('uri.com/0');
         });
     });
 });
