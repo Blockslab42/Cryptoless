@@ -26,7 +26,7 @@ contract nft is ERC721A, Ownable {
     ///@dev  message = eth volume (calculated in front-end)
     mapping(uint256 => uint256) public nftIdToMessage;
 
-    constructor() ERC721A("nft", "nft") {
+    constructor() ERC721A("nft", "nft") Ownable() {
         //fill img data
 
         //use ONE_ETH to define price in a readable fashion ?
@@ -41,9 +41,6 @@ contract nft is ERC721A, Ownable {
         imageData[8] = ImageData(0, 100, 1);
         imageData[9] = ImageData(0, 100, 1);
     }
-
-    mapping(address => uint256) public whiteListClaimed;
-    mapping(address => bool) private giveawayMintClaimed;
 
     /*
      * Function to mint new NFTs during the public sale
@@ -72,22 +69,6 @@ contract nft is ERC721A, Ownable {
         nftIdToImgId[nextTokenId] = _imgId;
         nftIdToMessage[nextTokenId] = _message;
         imageData[_imgId].totalSupply++;
-    }
-
-    /*
-     * Function to mint NFTs for giveaway and partnerships
-     */
-    function mintByOwner(address _to) public onlyOwner {
-        _safeMint(_to, 1);
-    }
-
-    /*
-     * Function to mint all NFTs for giveaway and partnerships
-     */
-    function mintMultipleByOwner(address[] memory _to) public onlyOwner {
-        for (uint256 i = 0; i < _to.length; i++) {
-            _safeMint(_to[i], 1);
-        }
     }
 
     /*
