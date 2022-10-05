@@ -6,8 +6,6 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
 
 contract nft is ERC721A, Ownable {
-    constructor() ERC721A("nft", "nft") {}
-
     string public _contractBaseURI;
     uint256 public MAX_NFT_PUBLIC = 100;
     uint256 public NFTPrice = 200000000000000000; // 0.2 ETH;
@@ -19,17 +17,34 @@ contract nft is ERC721A, Ownable {
     bool public isFreeMintActive;
     bytes32 public root;
 
+    enum RarityName {
+        UNIQUE,
+        RARE,
+        COMMON
+    }
+
+    struct RaritySpecs {
+        uint256 totalSupply;
+        uint256 maxSupply;
+        uint256 price;
+    }
+    mapping(RarityName => RaritySpecs) rarities;
+
+    constructor() ERC721A("nft", "nft") {
+        //fill rarities data
+    }
+
     mapping(address => uint256) public whiteListClaimed;
     mapping(uint256 => string) public messageStoredInNft;
     mapping(address => bool) private giveawayMintClaimed;
 
-    modifier isContractPublicSale {
+    modifier isContractPublicSale() {
         require(isActive == true, "Contract is not active");
         require(isPublicSaleActive == true, "PublicSale is not active");
         require(isPresaleActive == false, "Presale is still active");
         _;
     }
-    modifier isContractPresale {
+    modifier isContractPresale() {
         require(isActive == true, "Contract is not active");
         require(isPresaleActive == true, "Presale is not opened yet");
         require(isPublicSaleActive == false, "PublicSale is still active");
@@ -39,11 +54,35 @@ contract nft is ERC721A, Ownable {
     /*
      * Function to mint new NFTs during the public sale
      */
-    function mintNFT(uint256 _numOfTokens) external payable isContractPublicSale {
+    function mintNFT(uint256 _numOfTokens)
+        external
+        payable
+        isContractPublicSale
+    {
         require(_numOfTokens <= maxPerTransaction, "Cannot mint above limit");
-        require( totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC , "Purchase would exceed max public supply of NFTs" );
-        require( NFTPrice * _numOfTokens <= msg.value, "Ether value sent is not correct" );
+        require(
+            totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC,
+            "Purchase would exceed max public supply of NFTs"
+        );
+        require(
+            NFTPrice * _numOfTokens <= msg.value,
+            "Ether value sent is not correct"
+        );
+
+        if (rarity == UNIQUE) {
+            revert("call auction contract");
+        }
+
+        require(rarities[rarity].price == msg.value);
+        require(
+            rarities[rarity].totalSupply + _numOfTokens <
+                rarities[rarity].maxSupply,
+            "max supply reached"
+        );
+
         _safeMint(msg.sender, _numOfTokens);
+
+        rarities[rarity].totalSupply++;
     }
 
     // function mintDNFT(uint256 _numOfTokens, string message) external payable isContractPublicSale {
@@ -58,23 +97,48 @@ contract nft is ERC721A, Ownable {
      * Function to mint new NFTs during the public sale
      */
 
-    function mintNFTDuringPresale(uint256 _numOfTokens, bytes32[] memory _proof) external payable isContractPresale {
-        
-        require(MerkleProof.verify(_proof, root, keccak256(abi.encode(msg.sender))), "Not whitelisted");
-        require( totalSupply() < MAX_NFT_PUBLIC, "All public tokens have been minted");
-        require( totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC, "Purchase would exceed max public supply of NFTs" );
+    function mintNFTDuringPresale(uint256 _numOfTokens, bytes32[] memory _proof)
+        external
+        payable
+        isContractPresale
+    {
+        require(
+            MerkleProof.verify(_proof, root, keccak256(abi.encode(msg.sender))),
+            "Not whitelisted"
+        );
+        require(
+            totalSupply() < MAX_NFT_PUBLIC,
+            "All public tokens have been minted"
+        );
+        require(
+            totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC,
+            "Purchase would exceed max public supply of NFTs"
+        );
 
         if (!isFreeMintActive) {
-            require( whiteListClaimed[msg.sender] + _numOfTokens <= maxPerWalletPresale, "Purchase exceeds max whitelisted");
-            require( totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC, "Purchase would exceed max public supply of NFTs");
-            require(NFTPrice * _numOfTokens <= msg.value, "Ether value sent is not correct");
+            require(
+                whiteListClaimed[msg.sender] + _numOfTokens <=
+                    maxPerWalletPresale,
+                "Purchase exceeds max whitelisted"
+            );
+            require(
+                totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC,
+                "Purchase would exceed max public supply of NFTs"
+            );
+            require(
+                NFTPrice * _numOfTokens <= msg.value,
+                "Ether value sent is not correct"
+            );
             whiteListClaimed[msg.sender] += _numOfTokens;
             _safeMint(msg.sender, _numOfTokens);
         } else {
-                require(_numOfTokens == 1, "Cannot purchase this many tokens");
-                require( !giveawayMintClaimed[msg.sender], "Already claimed giveaway");
-                giveawayMintClaimed[msg.sender] = true;
-                _safeMint(msg.sender, _numOfTokens);
+            require(_numOfTokens == 1, "Cannot purchase this many tokens");
+            require(
+                !giveawayMintClaimed[msg.sender],
+                "Already claimed giveaway"
+            );
+            giveawayMintClaimed[msg.sender] = true;
+            _safeMint(msg.sender, _numOfTokens);
         }
     }
 
@@ -82,7 +146,10 @@ contract nft is ERC721A, Ownable {
      * Function to mint NFTs for giveaway and partnerships
      */
     function mintByOwner(address _to) public onlyOwner {
-        require(totalSupply() + 1 <= MAX_NFT_PUBLIC , "Tokens number to mint cannot exceed number of MAX tokens category 1");
+        require(
+            totalSupply() + 1 <= MAX_NFT_PUBLIC,
+            "Tokens number to mint cannot exceed number of MAX tokens category 1"
+        );
         _safeMint(_to, 1);
     }
 
@@ -90,9 +157,12 @@ contract nft is ERC721A, Ownable {
      * Function to mint all NFTs for giveaway and partnerships
      */
     function mintMultipleByOwner(address[] memory _to) public onlyOwner {
-        require( totalSupply() + _to.length <= MAX_NFT_PUBLIC , "Tokens number to mint cannot exceed number of tokens");
+        require(
+            totalSupply() + _to.length <= MAX_NFT_PUBLIC,
+            "Tokens number to mint cannot exceed number of tokens"
+        );
         for (uint256 i = 0; i < _to.length; i++) {
-            _safeMint(_to[i], 1); 
+            _safeMint(_to[i], 1);
         }
     }
 

@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.7.2",
+    "@openzeppelin/contracts": "^4.7.3",
     "@types/mocha": "^9.1.1",
     "dotenv": "^16.0.1",
-    "erc721a": "^4.2.2",
+    "erc721a": "^4.2.3",
     "hardhat": "^2.10.1",
     "merkletreejs": "^0.2.32"
   },
