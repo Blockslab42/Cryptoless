@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
     paths: {
         artifacts: './artifacts',
     },
-    defaultNetwork: 'localhost',
+    defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
             chainId: 1337, // network config 1337 is for test for exemple mainnet ETH : 1
