@@ -27,12 +27,12 @@ describe('nft contract', function () {
     //     });
     // });
 
-    describe('Public Sale', async function () {
+    describe('Mint', async function () {
         beforeEach(async function () {
             await contract.toggleActive();
         });
 
-        it('Should fail if public sale not opened', async function () {
+        it('Should fail to mint if public sale not opened', async function () {
             await contract.toggleActive();
             await expect(
                 contract.connect(addr2).mintNFT(9, 111, {
@@ -106,7 +106,18 @@ describe('nft contract', function () {
 
             await contract.setURI('uri.com/');
 
-            await expect(await contract.tokenURI(0)).to.equal('uri.com/0');
+            await expect(await contract.tokenURI(0)).to.equal('uri.com/9');
+        });
+
+        it('Should succeed to mint', async function () {
+            await expect(
+                await contract.connect(addr2).mintNFT(9, 111, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+
+            await expect(await contract.nftIdToImgId(0)).to.equal('9');
+            await expect(await contract.nftIdToMessage(0)).to.equal('111');
         });
     });
 });

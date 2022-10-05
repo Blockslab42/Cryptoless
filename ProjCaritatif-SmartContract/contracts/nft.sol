@@ -57,9 +57,10 @@ contract nft is ERC721A, Ownable {
             "max supply reached for this img"
         );
 
+        uint256 nextTokenId = _nextTokenId();
+
         _safeMint(msg.sender, 1);
 
-        uint256 nextTokenId = _nextTokenId();
         nftIdToImgId[nextTokenId] = _imgId;
         nftIdToMessage[nextTokenId] = _message;
         imageData[_imgId].totalSupply++;
