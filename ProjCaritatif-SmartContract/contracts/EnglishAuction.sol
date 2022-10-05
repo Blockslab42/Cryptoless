@@ -5,8 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
 
-import "hardhat/console.sol";
-
 contract EnglishAuction {
     event Start();
     event Bid(address indexed sender, uint256 amount);
@@ -17,7 +15,6 @@ contract EnglishAuction {
     uint256 public immutable nftId;
 
     address payable public immutable seller;
-    uint32 public duration;
     uint32 public endAt;
     bool public started;
     bool public ended;
@@ -38,11 +35,11 @@ contract EnglishAuction {
     }
 
     /// @dev seller needs to approve contract beforehand to allow it to transfer the nft on his behalf
-    function startAuction(uint32 duration) external {
+    function startAuction(uint32 _duration) external {
         require(msg.sender == seller, "not seller");
         require(!started, "started");
         started = true;
-        endAt = uint32(block.timestamp + duration);
+        endAt = uint32(block.timestamp + _duration);
         //nft.transferFrom(msg.sender, address(this), nftId);
         // useless to transfer twice, just transfer at settlement
 

@@ -4,11 +4,8 @@ pragma solidity ^0.8.14;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
-import "./Raffle.sol";
 
-import "hardhat/console.sol";
-
-contract nft is ERC721A, Ownable, Raffle {
+contract nft is ERC721A, Ownable {
     constructor() ERC721A("nft", "nft") {}
 
     string public _contractBaseURI;
@@ -23,6 +20,7 @@ contract nft is ERC721A, Ownable, Raffle {
     bytes32 public root;
 
     mapping(address => uint256) public whiteListClaimed;
+    mapping(uint256 => string) public messageStoredInNft;
     mapping(address => bool) private giveawayMintClaimed;
 
     modifier isContractPublicSale {
@@ -43,25 +41,23 @@ contract nft is ERC721A, Ownable, Raffle {
      */
     function mintNFT(uint256 _numOfTokens) external payable isContractPublicSale {
         require(_numOfTokens <= maxPerTransaction, "Cannot mint above limit");
-        require( totalSupply() + _numOfTokens + totalRaffleMinted <= MAX_NFT_PUBLIC - raffleSupply, "Purchase would exceed max public supply of NFTs" );
+        require( totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC , "Purchase would exceed max public supply of NFTs" );
         require( NFTPrice * _numOfTokens <= msg.value, "Ether value sent is not correct" );
         _safeMint(msg.sender, _numOfTokens);
     }
 
+    // function mintDNFT(uint256 _numOfTokens, string message) external payable isContractPublicSale {
+    //     require(_numOfTokens <= maxPerTransaction, "Cannot mint above limit");
+    //     require( totalSupply() + _numOfTokens <= MAX_NFT_PUBLIC , "Purchase would exceed max public supply of NFTs" );
+    //     require( NFTPrice * _numOfTokens <= msg.value, "Ether value sent is not correct" );
+    //     // messageStoredInNft[] = message;
+    //     _safeMint(msg.sender, _numOfTokens);
+    // }
+
     /*
      * Function to mint new NFTs during the public sale
      */
-    function mintNFTDuringRaffle(uint256 _numOfTokens) external payable raffleCheck {
-        require(isActive, "Contract is not active");
-        require(_numOfTokens <= maxPerTransaction, "Cannot mint above limit");
-        require( (totalRaffleMinted + _numOfTokens) <= raffleSupply, "Purchase would exceed max raffle supply of NFTs ");
-        _safeMint(msg.sender, _numOfTokens);
-        subscribedToRaffle[msg.sender] == false;
-    }
 
-    /*
-     * Function to mint new NFTs during the presale
-     */
     function mintNFTDuringPresale(uint256 _numOfTokens, bytes32[] memory _proof) external payable isContractPresale {
         
         require(MerkleProof.verify(_proof, root, keccak256(abi.encode(msg.sender))), "Not whitelisted");
