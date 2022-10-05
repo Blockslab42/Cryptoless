@@ -8,6 +8,7 @@ import "erc721a/contracts/ERC721A.sol";
 contract nft is ERC721A, Ownable {
     string public _contractBaseURI;
     uint256 public MAX_NFT_PUBLIC = 100;
+    uint256 public nbrMinted = 0;
     uint256 public NFTPrice = 200000000000000000; // 0.2 ETH;
     uint256 public maxPerWalletPresale = 6;
     uint256 public maxPerTransaction = 10;
@@ -27,15 +28,19 @@ contract nft is ERC721A, Ownable {
         uint256 totalSupply;
         uint256 maxSupply;
         uint256 price;
+        uint256 nbrImg;
     }
-    mapping(RarityName => RaritySpecs) rarities;
+
+    mapping(RarityName => RaritySpecs) public rarities;
+    mapping(uint256 => RarityName) public nftIdToRarity;
+    mapping(uint256 => uint256) public messageStoredInNft;
+    mapping(uint256 => uint256) public nftIdToIdImg;
 
     constructor() ERC721A("nft", "nft") {
         //fill rarities data
     }
 
     mapping(address => uint256) public whiteListClaimed;
-    mapping(uint256 => string) public messageStoredInNft;
     mapping(address => bool) private giveawayMintClaimed;
 
     modifier isContractPublicSale() {
@@ -54,7 +59,7 @@ contract nft is ERC721A, Ownable {
     /*
      * Function to mint new NFTs during the public sale
      */
-    function mintNFT(uint256 _numOfTokens)
+    function mintNFT(uint256 _numOfTokens, RarityName _rarity, uint256 _idImg, uint256 _message)
         external
         payable
         isContractPublicSale
@@ -69,20 +74,25 @@ contract nft is ERC721A, Ownable {
             "Ether value sent is not correct"
         );
 
-        if (rarity == UNIQUE) {
+        if (_rarity == RarityName.UNIQUE) {
             revert("call auction contract");
         }
 
-        require(rarities[rarity].price == msg.value);
+        require(rarities[_rarity].price == msg.value);
         require(
-            rarities[rarity].totalSupply + _numOfTokens <
-                rarities[rarity].maxSupply,
+            rarities[_rarity].totalSupply + _numOfTokens <
+                rarities[_rarity].maxSupply,
             "max supply reached"
         );
+        require(_idImg>= 0 && _idImg>= rarities[_rarity].nbrImg, "");
 
         _safeMint(msg.sender, _numOfTokens);
 
-        rarities[rarity].totalSupply++;
+        rarities[_rarity].totalSupply++;
+        nftIdToRarity[nbrMinted] = _rarity;
+        nftIdToIdImg[nbrMinted] = _idImg;
+        messageStoredInNft[nbrMinted] = _message;
+        nbrMinted++;
     }
 
     // function mintDNFT(uint256 _numOfTokens, string message) external payable isContractPublicSale {
