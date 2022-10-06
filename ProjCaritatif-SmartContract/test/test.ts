@@ -14,8 +14,7 @@ import { ethAddressList } from '../addressList';
 describe('nft contract', function () {
     let precontract: any;
     let contract: Contract;
-    let precontractAuction: any;
-    let contractA: Contract;
+
     let owner: SignerWithAddress;
     let addr1: SignerWithAddress;
     let addr2: SignerWithAddress;
@@ -246,19 +245,106 @@ describe('nft contract', function () {
                 await contract.connect(addr2).balanceOf(addr2.address)
             ).to.equal(1);
         });
+
+        it('Should mint unique nft by owner', async function () {
+            await expect(
+                await contract.connect(owner).mintNFT(0, 11, {
+                    value: 0,
+                })
+            );
+        });
+
+        it('Should not mint unique nft by other user', async function () {
+            await expect(
+                contract.connect(addr1).mintNFT(0, 11, {
+                    value: 0,
+                })
+            ).to.be.revertedWith('invalid _imgId');
+        });
+    });
+});
+
+describe('auction contract', async function () {
+    let precontract: any;
+    let contract: Contract;
+    let precontractAuction: any;
+    let contractA: Contract;
+    let owner: SignerWithAddress;
+    let addr1: SignerWithAddress;
+    let addr2: SignerWithAddress;
+    let addr3: SignerWithAddress;
+    let addrs: SignerWithAddress[];
+
+    beforeEach(async function () {
+        [owner, addr1, addr2, addr3, ...addrs] = await ethers.getSigners();
+        precontract = await ethers.getContractFactory('nft');
+        contract = await precontract.deploy();
+        precontractAuction = await ethers.getContractFactory('EnglishAuction');
+        contractA = await precontractAuction.deploy(contract.address, 0, 1);
     });
 
-    describe('Auction', async function () {
-        // [owner, addr1, addr2, addr3, ...addrs] = await ethers.getSigners();
-        precontractAuction = await ethers.getContractFactory('EnglishAuction');
-        contractA = await precontractAuction.deploy();
+    it('Should start by owner', async function () {
+        await expect(await contractA.connect(owner).start(100));
+        await expect(contractA.connect(addr2).start(100)).to.be.revertedWith(
+            'not seller'
+        );
+    });
 
-        it('oui', async function () {
-            await expect(
-                contractA.connect(addr2).mintNFT(3, 111, {
-                    value: 10,
-                })
-            ).to.be.revertedWith('incorrect eth value');
+    it('Should not bid by user before start', async function () {
+        await expect(
+            contractA.connect(addr2).bid({
+                value: 2,
+            })
+        ).to.be.revertedWith('not started');
+    });
+
+    describe('auction', async function () {
+        beforeEach(async function () {
+            await contract.toggleActive();
+            await contract.connect(owner).mintNFT(0, 111, {
+                value: 0,
+            });
+            await expect(await contractA.connect(owner).start(100));
         });
+
+        it('Should bid by users', async function () {
+            await expect(
+                await contractA.connect(addr1).bid({
+                    value: 2,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 3,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).highestBidder()
+            ).to.equal(addr2.address);
+        });
+
+        it('Should not bid by user with inferior value', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 3,
+                })
+            );
+            await expect(
+                contractA.connect(addr2).bid({
+                    value: 2,
+                })
+            ).to.be.revertedWith('value < highest bid');
+
+            await expect(await contractA.connect(addr2).highestBid()).to.equal(
+                3
+            );
+        });
+
+        // it('Should stop auction by owner', async function () {
+        //     await expect(await contractA.connect(owner).end());
+        //     await expect(contractA.connect(addr2).end()).to.be.revertedWith(
+        //         'not seller'
+        //     );
+        // });
     });
 });
