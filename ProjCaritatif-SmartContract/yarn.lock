@@ -524,10 +524,10 @@
     "table" "^6.8.0"
     "undici" "^5.4.0"
 
-"@openzeppelin/contracts@^4.7.2":
-  "integrity" "sha512-4n/JL9izql8303mPqPdubuna/DWEMbmOzWYUWyCPhjhiEr2w3nQrjE7vZz1fBF+wzzP6dZbIcsgqACk53c9FGA=="
-  "resolved" "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-4.7.2.tgz"
-  "version" "4.7.2"
+"@openzeppelin/contracts@^4.7.3":
+  "integrity" "sha512-dGRS0agJzu8ybo44pCIf3xBaPQN/65AIXNgK8+4gzKd5kbvlqyxryUYVLJv7fK98Seyd2hDZzVEHSWAh0Bt1Yw=="
+  "resolved" "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-4.7.3.tgz"
+  "version" "4.7.3"
 
 "@openzeppelin/hardhat-upgrades@^1.21.0":
   "integrity" "sha512-Kwl7IN0Hlhj4HluMTTl0DrtU90OI/Q6rG3sAyd2pv3fababe9EuZqs9DydOlkWM45JwTzC+eBzX3TgHsqI13eA=="
@@ -2124,10 +2124,10 @@
   "resolved" "https://registry.npmjs.org/env-paths/-/env-paths-2.2.1.tgz"
   "version" "2.2.1"
 
-"erc721a@^4.2.2":
-  "integrity" "sha512-u5kDOqn47qFCTjXtU8VUrNqToo6aZaiUxy4e9Rtmjq3sR1k+NEZf8Kh+H5VT65rDSglRn1nn4MrY7QVa1n3Eig=="
-  "resolved" "https://registry.npmjs.org/erc721a/-/erc721a-4.2.2.tgz"
-  "version" "4.2.2"
+"erc721a@^4.2.3":
+  "integrity" "sha512-0deF0hOOK1XI1Vxv3NKDh2E9sgzRlENuOoexjXRJIRfYCsLlqi9ejl2RF6Wcd9HfH0ldqC03wleQ2WDjxoOUvA=="
+  "resolved" "https://registry.npmjs.org/erc721a/-/erc721a-4.2.3.tgz"
+  "version" "4.2.3"
 
 "errno@~0.1.1":
   "integrity" "sha512-dJ6oBr5SQ1VSd9qkk7ByRgb/1SH4JZjCHSW/mr63/QcXO9zLVxvJ6Oy13nio03rxpSnVDDjFor75SjVeZWPW/A=="

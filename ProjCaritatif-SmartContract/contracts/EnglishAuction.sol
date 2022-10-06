@@ -4,6 +4,8 @@ pragma solidity ^0.8.14;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
+import "hardhat/console.sol";
+
 
 contract EnglishAuction {
     event Start();
@@ -35,7 +37,7 @@ contract EnglishAuction {
     }
 
     /// @dev seller needs to approve contract beforehand to allow it to transfer the nft on his behalf
-    function startAuction(uint32 _duration) external {
+    function start(uint32 _duration) external {
         require(msg.sender == seller, "not seller");
         require(!started, "started");
         started = true;
@@ -63,7 +65,8 @@ contract EnglishAuction {
 
     function withdraw() external {
         //prevent highest bidder to default on his bid after auction is ended
-        require(!ended || highestBidder != msg.sender, "ended");
+        
+        require(highestBidder != msg.sender, "highestBidder cant withdraw");
         uint256 bal = bids[msg.sender];
         bids[msg.sender] = 0;
         payable(msg.sender).transfer(bal);

@@ -2,13 +2,19 @@ import { assert, expect } from 'chai';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { ethers, network } from 'hardhat';
 import { BigNumber, Contract } from 'ethers';
-import { defaultAbiCoder, keccak256, parseEther } from 'ethers/lib/utils';
+import {
+    defaultAbiCoder,
+    keccak256,
+    LogDescription,
+    parseEther,
+} from 'ethers/lib/utils';
 import { MerkleTree } from 'merkletreejs';
 import { ethAddressList } from '../addressList';
 
 describe('nft contract', function () {
     let precontract: any;
     let contract: Contract;
+
     let owner: SignerWithAddress;
     let addr1: SignerWithAddress;
     let addr2: SignerWithAddress;
@@ -21,356 +27,472 @@ describe('nft contract', function () {
         contract = await precontract.deploy();
     });
 
-    describe('Deployment', function () {
-        it('Should set the right owner', async function () {
-            expect(await contract.owner()).to.equal(owner.address);
-        });
-    });
+    // describe('Deployment', function () {
+    //     it('Should set the right owner', async function () {
+    //         expect(await contract.owner()).to.equal(owner.address);
+    //     });
+    // });
 
-    describe('Giveaways', function () {
-        it('Should mint 10 giveaways', async function () {
-            await contract.mintMultipleByOwner(ethAddressList);
-            expect(await (await contract.totalSupply()).toString()).to.equal(
-                '10'
-            );
-        });
-
-        it('Should be the right owner', async function () {
-            await contract.mintMultipleByOwner(ethAddressList);
-            expect(await contract.ownerOf(0)).to.equal(ethAddressList[0]);
-            expect(await contract.ownerOf(4)).to.equal(ethAddressList[4]);
-            expect(await contract.ownerOf(9)).to.equal(ethAddressList[9]);
-        });
-    });
-
-    describe('Raffle Sale', async function () {
+    describe('Mint', async function () {
         beforeEach(async function () {
             await contract.toggleActive();
         });
 
-        it('Should fail if Raffle is not active', async function () {
-            if (!(await contract.isActive())) await contract.toggleActive();
-            await expect(
-                contract.connect(addr1).mintNFTDuringRaffle(1, {
-                    value: await ((await contract.NFTPrice()) * 2).toString(),
-                })
-            ).to.be.revertedWith('Raffle is not active');
-        });
-
-        it('Should fail if caller not subscribed for raffle', async function () {
-            if (!(await contract.isActive())) await contract.toggleActive();
-
-            if (!(await contract.isRaffleActive()))
-                await contract.toggleRaffle();
-
-            await expect(
-                contract.connect(addr1).mintNFTDuringRaffle(1, {
-                    value: await ((await contract.NFTPrice()) * 2).toString(),
-                })
-            ).to.be.revertedWith('Caller not subscribed to raffle');
-        });
-
-        it('Should fail to subscribe if subscription not open', async function () {
-            if (!(await contract.isActive())) await contract.toggleActive();
-
-            await expect(
-                contract.connect(addr1).subscribeToRaffle({
-                    value: await ((await contract.NFTPrice()) * 2).toString(),
-                })
-            ).to.be.revertedWith('Raffle subscription not open');
-        });
-
-        it('Should fail to subscribe if eth value not amount to subscription fee', async function () {
-            if (!(await contract.isActive())) await contract.toggleActive();
-
-            if (!(await contract.isSubscriptionOpen()))
-                await contract.toggleSubscription();
-
-            await expect(
-                contract.connect(addr1).subscribeToRaffle({
-                    value: await (
-                        (await contract.subscriptionFee()) * 0.5
-                    ).toString(),
-                })
-            ).to.be.revertedWith('Eth value should amount to subscription fee');
-        });
-
-        it('Should subscribe to raffle', async function () {
-            if (!(await contract.isActive())) await contract.toggleActive();
-
-            if (!(await contract.isSubscriptionOpen()))
-                await contract.toggleSubscription();
-
-            await contract.connect(addr1).subscribeToRaffle({
-                value: (await contract.subscriptionFee()).toString(),
-            });
-
-            expect(await contract.subscribedToRaffle(addr1.address)).to.equal(
-                true
-            );
-        });
-
-        it("Shouldn't mint during raffle if raffle not active", async function () {
-            if (!(await contract.isActive())) await contract.toggleActive();
-            if (await contract.isRaffleActive()) await contract.toggleRaffle();
-
-            if (!(await contract.isSubscriptionOpen()))
-                await contract.toggleSubscription();
-
-            await contract.connect(addr2).subscribeToRaffle({
-                value: (await contract.subscriptionFee()).toString(),
-            });
-
-            console.log(await contract.isRaffleActive());
-
-            await expect(
-                contract.connect(addr2).mintNFTDuringRaffle(1)
-            ).to.be.revertedWith('Raffle is not active');
-        });
-
-        it('Should mint during raffle if caller is subscribed', async function () {
-            if (!(await contract.isActive())) await contract.toggleActive();
-
-            if (!(await contract.isSubscriptionOpen()))
-                await contract.toggleSubscription();
-
-            if (!(await contract.isRaffleActive()))
-                await contract.toggleRaffle();
-
-            await contract.connect(addr3).subscribeToRaffle({
-                value: (await contract.subscriptionFee()).toString(),
-            });
-
-            await contract.connect(addr3).mintNFTDuringRaffle(1);
-            await expect(await contract.totalSupply()).to.equal(1);
-            await expect(await contract.ownerOf(0)).to.equal(addr3.address);
-        });
-    });
-
-    describe('Whitelist Sale', async function () {
-        let merkleTree: MerkleTree;
-        let leaves: string[];
-        let proof: string[];
-
-        beforeEach(async function () {
-            leaves = ethAddressList.map((addr) =>
-                defaultAbiCoder.encode(['address'], [addr])
-            );
-
-            merkleTree = new MerkleTree(leaves, keccak256, {
-                hashLeaves: true,
-                sortPairs: true,
-            });
-
-            await contract.setRoot(merkleTree.getHexRoot());
-            proof = merkleTree.getHexProof(keccak256(leaves[0]));
+        it('Should fail to mint if public sale not opened', async function () {
             await contract.toggleActive();
-        });
-
-        it('Should fail if Presale is not active', async function () {
-            expect(
-                contract.connect(addrs[3]).mintNFTDuringPresale(1, proof, {
-                    value: await (await contract.NFTPrice()).toString(),
-                })
-            ).to.be.revertedWith('Presale is not opened yet');
-        });
-
-        it('Should fail if not Whitelisted', async function () {
-            expect(
-                contract.mintNFTDuringPresale(1, proof, {
-                    value: await (await contract.NFTPrice()).toString(),
-                })
-            ).to.be.revertedWith('Not whitelisted');
-        });
-
-        it('Should mint if Whitelisted', async function () {
-            await contract.togglePresale();
-            expect(
-                await contract.mintNFTDuringPresale(2, proof, {
-                    value: await ((await contract.NFTPrice()) * 2).toString(),
-                })
-            );
-        });
-
-        it('Should fail if incorrect Price', async function () {
-            await contract.togglePresale();
             await expect(
-                contract.mintNFTDuringPresale(3, proof, {
-                    value: await ((await contract.NFTPrice()) * 2).toString(),
-                })
-            ).to.be.revertedWith('Ether value sent is not correct');
-        });
-
-        it('Should fail if over max presale', async function () {
-            await contract.togglePresale();
-            await expect(
-                contract.mintNFTDuringPresale(7, proof, {
-                    value: await ((await contract.NFTPrice()) * 7).toString(),
-                })
-            ).to.be.revertedWith('Purchase exceeds max whitelisted');
-        });
-
-        it('Should fail free mint if claim more than 1 NFT', async function () {
-            await contract.togglePresale();
-            await contract.toggleFreeMint();
-            await expect(
-                contract.mintNFTDuringPresale(2, proof)
-            ).to.be.revertedWith('Cannot purchase this many tokens');
-        });
-
-        it('Should free mint one NFT if free mint open', async function () {
-            await contract.togglePresale();
-            await contract.toggleFreeMint();
-            await expect(contract.mintNFTDuringPresale(1, proof));
-        });
-
-        it('Should fail free mint if already claimed', async function () {
-            await contract.togglePresale();
-            await contract.toggleFreeMint();
-            await expect(contract.mintNFTDuringPresale(1, proof));
-            await expect(
-                contract.mintNFTDuringPresale(1, proof)
-            ).to.be.revertedWith('Already claimed giveaway');
-        });
-    });
-
-    describe('Public Sale', async function () {
-        beforeEach(async function () {
-            await contract.toggleActive();
-        });
-
-        it('Should fail if public sale not opened', async function () {
-            await expect(
-                contract.connect(addr2).mintNFT(1, {
-                    value: await ((await contract.NFTPrice()) * 11).toString(),
+                contract.connect(addr2).mintNFT(2, 111, {
+                    value: 1,
                 })
             ).to.be.revertedWith('PublicSale is not active');
         });
 
-        it('Should fail if buy limit is reached', async function () {
-            await contract.togglePublicSale();
-            await expect(
-                contract.connect(addr2).mintNFT(11, {
-                    value: await ((await contract.NFTPrice()) * 11).toString(),
-                })
-            ).to.be.revertedWith('Cannot mint above limit');
-        });
-
         it('Should fail if Ether value sent is not correct', async function () {
-            await contract.togglePublicSale();
-
             await expect(
-                contract.connect(addr2).mintNFT(2, {
-                    value: await ((await contract.NFTPrice()) * 1).toString(),
+                contract.connect(addr2).mintNFT(3, 111, {
+                    value: 10,
                 })
-            ).to.be.revertedWith('Ether value sent is not correct');
+            ).to.be.revertedWith('incorrect eth value');
         });
 
-        it('Should mint 2 NFT', async function () {
-            await contract.togglePublicSale();
-
+        it('Should return correct total supply', async function () {
             await expect(
-                await contract.connect(addr2).mintNFT(2, {
-                    value: await ((await contract.NFTPrice()) * 2).toString(),
+                await contract.connect(addr2).mintNFT(4, 111, {
+                    value: 1,
                 })
             );
-            await expect(await contract.ownerOf(0)).to.equal(addr2.address);
-            await expect(await contract.ownerOf(1)).to.equal(addr2.address);
-            await expect(await contract.totalSupply()).to.equal(2);
+            await expect(
+                await contract.connect(addr2).mintNFT(5, 111, {
+                    value: 1,
+                })
+            );
+            await expect(
+                await contract.connect(addr3).mintNFT(6, 111, {
+                    value: 1,
+                })
+            );
+            await expect(
+                await contract.connect(addrs[4]).mintNFT(7, 111, {
+                    value: 1,
+                })
+            );
+            await expect(
+                await contract.connect(addrs[5]).mintNFT(8, 111, {
+                    value: 1,
+                })
+            );
+            await expect(
+                await contract.connect(addrs[6]).mintNFT(9, 111, {
+                    value: 1,
+                })
+            );
+            await expect(
+                await contract.connect(addrs[7]).mintNFT(4, 111, {
+                    value: 1,
+                })
+            );
+            await expect(
+                await contract.connect(addrs[8]).mintNFT(2, 111, {
+                    value: 1,
+                })
+            );
+            await expect(
+                await contract.connect(addrs[9]).mintNFT(5, 111, {
+                    value: 1,
+                })
+            );
+            await expect(await contract.totalSupply()).to.equal(9);
+        });
+        it('Should return correct tokenURI', async function () {
+            await expect(
+                await contract.connect(addr2).mintNFT(9, 111, {
+                    value: 1,
+                })
+            );
+
+            await contract.setURI('uri.com/');
+
+            await expect(await contract.tokenURI(0)).to.equal('uri.com/9');
         });
 
-        it('Should withdraw the money', async function () {
-            await contract.togglePublicSale();
+        it('Should return correct Img Id and message', async function () {
+            await expect(
+                await contract.connect(addr2).mintNFT(1, 115, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+
+            await expect(await contract.nftIdToImgId(0)).to.equal('1');
+            await expect(await contract.nftIdToMessage(0)).to.equal('115');
 
             await expect(
-                await contract.connect(addr2).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
+                await contract.connect(addr3).mintNFT(3, 51, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+
+            await expect(await contract.nftIdToImgId(1)).to.equal('3');
+            await expect(await contract.nftIdToMessage(1)).to.equal('51');
+        });
+
+        it('Should return correct supply Image', async function () {
+            let i = 0;
+            let imageData;
+            while (i < 8) {
+                await expect(
+                    await contract.connect(addr3).mintNFT(3, 51, {
+                        value: 1,
+                    })
+                ).to.not.be.reverted;
+
+                i++;
+                imageData = await contract.imageData(3);
+
+                await expect(imageData.totalSupply).to.equal(i);
+            }
+        });
+
+        it('Should not surpass supply', async function () {
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 1, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 2, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 3, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 4, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 5, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 6, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 7, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 8, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 9, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+            await expect(
+                await contract.connect(addr3).mintNFT(1, 10, {
+                    value: 1,
+                })
+            ).to.not.be.reverted;
+
+            await expect(
+                contract.connect(addr3).mintNFT(1, 11, {
+                    value: 1,
+                })
+            ).to.be.revertedWith('max supply reached for this img');
+        });
+
+        it('Should withdraw normaly', async function () {
+            await expect(
+                await contract.connect(addr2).mintNFT(4, 11, {
+                    value: 1,
+                })
+            );
+
+            await expect(await contract.connect(owner).withdraw(addr2.address));
+        });
+
+        it('Should not withdraw normaly by no owner', async function () {
+            await expect(
+                contract.connect(addr1).withdraw(addr2.address)
+            ).to.be.revertedWith('Ownable: caller is not the owner');
+        });
+
+        it('Should not mint with id image that does not exist', async function () {
+            await expect(
+                contract.connect(addr2).mintNFT(12, 11, {
+                    value: 1,
+                })
+            ).to.be.revertedWith('invalid _imgId');
+        });
+
+        it('Should return correct balance Of', async function () {
+            await expect(
+                contract.connect(addr2).mintNFT(2, 11, {
+                    value: 1,
                 })
             );
             await expect(
-                await contract.connect(addr2).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
-                })
-            );
+                await contract.connect(addr2).balanceOf(addr2.address)
+            ).to.equal(1);
+        });
+
+        it('Should mint unique nft by owner', async function () {
             await expect(
-                await contract.connect(addr3).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
+                await contract.connect(owner).mintNFT(0, 11, {
+                    value: 0,
                 })
             );
+        });
+
+        it('Should not mint unique nft by other user', async function () {
             await expect(
-                await contract.connect(addrs[4]).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
+                contract.connect(addr1).mintNFT(0, 11, {
+                    value: 0,
                 })
-            );
-            await expect(
-                await contract.connect(addrs[5]).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
-                })
-            );
-            await expect(
-                await contract.connect(addrs[6]).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
-                })
-            );
-            await expect(
-                await contract.connect(addrs[7]).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
-                })
-            );
-            await expect(
-                await contract.connect(addrs[8]).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
-                })
-            );
-            await expect(
-                await contract.connect(addrs[9]).mintNFT(3, {
-                    value: await ((await contract.NFTPrice()) * 3).toString(),
-                })
-            );
-            await expect(await contract.totalSupply()).to.equal(27);
+            ).to.be.revertedWith('invalid _imgId');
         });
     });
+});
 
-    describe('change supply', function () {
-        it('Should change the NFT supply', async function () {
-            expect(await contract.MAX_NFT_PUBLIC()).to.equal(100);
-            await contract.setTotalSupply(200);
-            expect(await contract.MAX_NFT_PUBLIC()).to.equal(200);
-        });
+describe('auction contract', async function () {
+    let precontract: any;
+    let contract: Contract;
+    let precontractAuction: any;
+    let contractA: Contract;
+    let owner: SignerWithAddress;
+    let addr1: SignerWithAddress;
+    let addr2: SignerWithAddress;
+    let addr3: SignerWithAddress;
+    let addrs: SignerWithAddress[];
+
+    beforeEach(async function () {
+        [owner, addr1, addr2, addr3, ...addrs] = await ethers.getSigners();
+        precontract = await ethers.getContractFactory('nft');
+        contract = await precontract.deploy();
+        precontractAuction = await ethers.getContractFactory('EnglishAuction');
+        contractA = await precontractAuction.deploy(contract.address, 0, 1);
     });
 
-    describe('change price', function () {
-        it('Should change the NFT price', async function () {
-            expect(await contract.NFTPrice()).to.equal(200000000000000000n);
-            await contract.setNFTPrice(20000000000000000n);
-            expect(await contract.NFTPrice()).to.equal(20000000000000000n);
-        });
+    it('Should start by owner', async function () {
+        await expect(await contractA.connect(owner).start(100));
+        await expect(contractA.connect(addr2).start(100)).to.be.revertedWith(
+            'not seller'
+        );
     });
 
-    describe('Token URI', function () {
-        it('Should set the right URI', async function () {
+    it('Should not end before start ', async function () {
+        await expect(contractA.connect(owner).end()).to.be.revertedWith(
+            'not started'
+        );
+    });
+
+    it('Should not bid by user before start', async function () {
+        await expect(
+            contractA.connect(addr2).bid({
+                value: 2,
+            })
+        ).to.be.revertedWith('not started');
+    });
+
+    describe('auction after start', async function () {
+        beforeEach(async function () {
             await contract.toggleActive();
-            await contract.togglePublicSale();
-            await expect(
-                await contract.connect(addrs[1]).mintNFT(1, {
-                    value: await ((await contract.NFTPrice()) * 1).toString(),
-                })
-            );
-            await expect(
-                await contract.connect(addrs[1]).mintNFT(2, {
-                    value: await ((await contract.NFTPrice()) * 2).toString(),
-                })
-            );
-            await contract.setURI('https://hiddenTest/');
-            expect(await contract.tokenURI(0)).to.equal('https://hiddenTest/0');
-            expect(await contract.tokenURI(2)).to.equal('https://hiddenTest/2');
-            await contract.setURI('https://test/');
-            expect(await contract.tokenURI(0)).to.equal('https://test/0');
-            expect(await contract.tokenURI(2)).to.equal('https://test/2');
+            await contract.connect(owner).mintNFT(0, 111, {
+                value: 0,
+            });
+            await expect(await contractA.connect(owner).start(100));
         });
 
-        it('Should fail for non existing token', async function () {
-            await expect(contract.tokenURI(4)).to.be.reverted;
+        it('Should bid by users', async function () {
+            await expect(
+                await contractA.connect(addr1).bid({
+                    value: 2,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 3,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).highestBidder()
+            ).to.equal(addr2.address);
+        });
+
+        it('Should return correct bid raise by users', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 6,
+                })
+            );
+            await expect(
+                await contractA.connect(addr3).bid({
+                    value: 10,
+                })
+            );
+
+            expect(await contractA.bids(addr2.address)).to.equal(6);
+            expect(await contractA.bids(addr3.address)).to.equal(10);
+        });
+
+        it('Should not bid by user with inferior value', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 3,
+                })
+            );
+            await expect(
+                contractA.connect(addr2).bid({
+                    value: 2,
+                })
+            ).to.be.revertedWith('value < highest bid');
+
+            await expect(await contractA.connect(addr2).highestBid()).to.equal(
+                3
+            );
+        });
+
+        it('Should not stop auction before end timestamp', async function () {
+            await expect(contractA.connect(owner).end()).to.be.revertedWith(
+                'not ended'
+            );
+        });
+
+        it('Should witdhraw only by users and not by highest bidder', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 5,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 7,
+                })
+            );
+            await expect(await contractA.bids(addr2.address)).to.equal(12);
+
+            await expect(await contractA.connect(addr1).withdraw());
+
+            await expect(
+                contractA.connect(addr2).withdraw()
+            ).to.be.revertedWith('highestBidder cant withdraw');
+        });
+
+        it('Should witdhraw correctly and bids addition work', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 5,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 7,
+                })
+            );
+            await expect(
+                await contractA.connect(addr3).bid({
+                    value: 10,
+                })
+            );
+            await expect(await contractA.bids(addr2.address)).to.equal(12);
+
+            await expect(await contractA.connect(addr2).withdraw());
+
+            await expect(await contractA.bids(addr2.address)).to.equal(0);
+        });
+    });
+
+    describe('auction after timer', async function () {
+        beforeEach(async function () {
+            await contract.toggleActive();
+            await contract.connect(owner).mintNFT(0, 111, {
+                value: 0,
+            });
+            await contractA.connect(owner).start(100);
+            await contractA.connect(addr1).bid({
+                value: 2,
+            });
+            await contractA.connect(addr2).bid({
+                value: 3,
+            });
+            await network.provider.send('evm_increaseTime', [600]);
+        });
+
+        it('Should not bid by user after timer', async function () {
+            await expect(
+                contractA.connect(addr1).bid({
+                    value: 4,
+                })
+            ).to.be.revertedWith('ended');
+
+            await expect(
+                await contractA.connect(addr1).highestBidder()
+            ).to.equal(addr2.address);
+        });
+
+        it('Should withdraw correctly after timer', async function () {
+            expect(await contractA.bids(addr1.address)).to.equal(2);
+            await expect(await contractA.connect(addr1).withdraw());
+            expect(await contractA.bids(addr1.address)).to.equal(0);
+        });
+
+        it('Should not withdraw by highest bidder after timer', async function () {
+            await expect(
+                contractA.connect(addr2).withdraw()
+            ).to.be.revertedWith('highestBidder cant withdraw');
+        });
+
+        it('Should end auction by owner after time ended', async function () {
+            await expect(
+                await contract.connect(owner).approve(contractA.address, 0)
+            );
+            await expect(await contractA.connect(owner).end());
+        });
+    });
+
+    describe('auction after end', async function () {
+        beforeEach(async function () {
+            await contract.toggleActive();
+            await contract.connect(owner).mintNFT(0, 111, {
+                value: 0,
+            });
+            await contractA.connect(owner).start(100);
+            await contractA.connect(addr1).bid({
+                value: 2,
+            });
+            await contractA.connect(addr2).bid({
+                value: 3,
+            });
+            await network.provider.send('evm_increaseTime', [600]);
+
+            await expect(
+                await contract.connect(owner).approve(contractA.address, 0)
+            );
+            await expect(await contractA.connect(owner).end());
+        });
+
+        it('Should not bid by user after end', async function () {
+            await expect(
+                contractA.connect(addr1).bid({
+                    value: 10,
+                })
+            ).to.be.revertedWith('ended');
+        });
+
+        it('Should withdraw correctly after end', async function () {
+            expect(await contractA.bids(addr1.address)).to.equal(2);
+            await expect(await contractA.connect(addr1).withdraw());
+            expect(await contractA.bids(addr1.address)).to.equal(0);
         });
     });
 });
