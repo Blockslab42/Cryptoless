@@ -4,6 +4,8 @@ pragma solidity ^0.8.14;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
+import "hardhat/console.sol";
+
 
 contract EnglishAuction {
     event Start();
@@ -63,7 +65,8 @@ contract EnglishAuction {
 
     function withdraw() external {
         //prevent highest bidder to default on his bid after auction is ended
-        require(!ended || highestBidder != msg.sender, "ended");
+        
+        require(highestBidder != msg.sender, "highestBidder cant withdraw");
         uint256 bal = bids[msg.sender];
         bids[msg.sender] = 0;
         payable(msg.sender).transfer(bal);

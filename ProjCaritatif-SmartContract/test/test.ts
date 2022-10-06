@@ -290,6 +290,12 @@ describe('auction contract', async function () {
         );
     });
 
+    it('Should not end before start ', async function () {
+        await expect(contractA.connect(owner).end()).to.be.revertedWith(
+            'not started'
+        );
+    });
+
     it('Should not bid by user before start', async function () {
         await expect(
             contractA.connect(addr2).bid({
@@ -298,7 +304,7 @@ describe('auction contract', async function () {
         ).to.be.revertedWith('not started');
     });
 
-    describe('auction', async function () {
+    describe('auction after start', async function () {
         beforeEach(async function () {
             await contract.toggleActive();
             await contract.connect(owner).mintNFT(0, 111, {
@@ -323,6 +329,22 @@ describe('auction contract', async function () {
             ).to.equal(addr2.address);
         });
 
+        it('Should return correct bid raise by users', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 6,
+                })
+            );
+            await expect(
+                await contractA.connect(addr3).bid({
+                    value: 10,
+                })
+            );
+
+            expect(await contractA.bids(addr2.address)).to.equal(6);
+            expect(await contractA.bids(addr3.address)).to.equal(10);
+        });
+
         it('Should not bid by user with inferior value', async function () {
             await expect(
                 await contractA.connect(addr2).bid({
@@ -340,11 +362,137 @@ describe('auction contract', async function () {
             );
         });
 
-        // it('Should stop auction by owner', async function () {
-        //     await expect(await contractA.connect(owner).end());
-        //     await expect(contractA.connect(addr2).end()).to.be.revertedWith(
-        //         'not seller'
-        //     );
-        // });
+        it('Should not stop auction before end timestamp', async function () {
+            await expect(contractA.connect(owner).end()).to.be.revertedWith(
+                'not ended'
+            );
+        });
+
+        it('Should witdhraw only by users and not by highest bidder', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 5,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 7,
+                })
+            );
+            await expect(await contractA.bids(addr2.address)).to.equal(12);
+
+            await expect(await contractA.connect(addr1).withdraw());
+
+            await expect(
+                contractA.connect(addr2).withdraw()
+            ).to.be.revertedWith('highestBidder cant withdraw');
+        });
+
+        it('Should witdhraw correctly and bids addition work', async function () {
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 5,
+                })
+            );
+            await expect(
+                await contractA.connect(addr2).bid({
+                    value: 7,
+                })
+            );
+            await expect(
+                await contractA.connect(addr3).bid({
+                    value: 10,
+                })
+            );
+            await expect(await contractA.bids(addr2.address)).to.equal(12);
+
+            await expect(await contractA.connect(addr2).withdraw());
+
+            await expect(await contractA.bids(addr2.address)).to.equal(0);
+        });
+    });
+
+    describe('auction after timer', async function () {
+        beforeEach(async function () {
+            await contract.toggleActive();
+            await contract.connect(owner).mintNFT(0, 111, {
+                value: 0,
+            });
+            await contractA.connect(owner).start(100);
+            await contractA.connect(addr1).bid({
+                value: 2,
+            });
+            await contractA.connect(addr2).bid({
+                value: 3,
+            });
+            await network.provider.send('evm_increaseTime', [600]);
+        });
+
+        it('Should not bid by user after timer', async function () {
+            await expect(
+                contractA.connect(addr1).bid({
+                    value: 4,
+                })
+            ).to.be.revertedWith('ended');
+
+            await expect(
+                await contractA.connect(addr1).highestBidder()
+            ).to.equal(addr2.address);
+        });
+
+        it('Should withdraw correctly after timer', async function () {
+            expect(await contractA.bids(addr1.address)).to.equal(2);
+            await expect(await contractA.connect(addr1).withdraw());
+            expect(await contractA.bids(addr1.address)).to.equal(0);
+        });
+
+        it('Should not withdraw by highest bidder after timer', async function () {
+            await expect(
+                contractA.connect(addr2).withdraw()
+            ).to.be.revertedWith('highestBidder cant withdraw');
+        });
+
+        it('Should end auction by owner after time ended', async function () {
+            await expect(
+                await contract.connect(owner).approve(contractA.address, 0)
+            );
+            await expect(await contractA.connect(owner).end());
+        });
+    });
+
+    describe('auction after end', async function () {
+        beforeEach(async function () {
+            await contract.toggleActive();
+            await contract.connect(owner).mintNFT(0, 111, {
+                value: 0,
+            });
+            await contractA.connect(owner).start(100);
+            await contractA.connect(addr1).bid({
+                value: 2,
+            });
+            await contractA.connect(addr2).bid({
+                value: 3,
+            });
+            await network.provider.send('evm_increaseTime', [600]);
+
+            await expect(
+                await contract.connect(owner).approve(contractA.address, 0)
+            );
+            await expect(await contractA.connect(owner).end());
+        });
+
+        it('Should not bid by user after end', async function () {
+            await expect(
+                contractA.connect(addr1).bid({
+                    value: 10,
+                })
+            ).to.be.revertedWith('ended');
+        });
+
+        it('Should withdraw correctly after end', async function () {
+            expect(await contractA.bids(addr1.address)).to.equal(2);
+            await expect(await contractA.connect(addr1).withdraw());
+            expect(await contractA.bids(addr1.address)).to.equal(0);
+        });
     });
 });

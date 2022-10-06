@@ -61,7 +61,7 @@ contract nft is ERC721A, Ownable {
         );
 
         uint256 nextTokenId = _nextTokenId();
-
+       
         _safeMint(msg.sender, 1);
 
         nftIdToImgId[nextTokenId] = _imgId;
