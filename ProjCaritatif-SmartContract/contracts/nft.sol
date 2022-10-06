@@ -31,15 +31,17 @@ contract nft is ERC721A, Ownable {
 
         //use ONE_ETH to define price in a readable fashion ?
         //add setters ? setImageData()
-        imageData[1] = ImageData(0, 100, 1);
-        imageData[2] = ImageData(0, 100, 1);
-        imageData[3] = ImageData(0, 100, 1);
-        imageData[4] = ImageData(0, 100, 1);
-        imageData[5] = ImageData(0, 100, 1);
-        imageData[6] = ImageData(0, 100, 1);
-        imageData[7] = ImageData(0, 100, 1);
-        imageData[8] = ImageData(0, 100, 1);
-        imageData[9] = ImageData(0, 100, 1);
+        imageData[0] = ImageData(0, 1, 0);
+
+        imageData[1] = ImageData(0, 10, 1);
+        imageData[2] = ImageData(0, 10, 1);
+        imageData[3] = ImageData(0, 10, 1);
+        imageData[4] = ImageData(0, 40, 1);
+        imageData[5] = ImageData(0, 40, 1);
+        imageData[6] = ImageData(0, 40, 1);
+        imageData[7] = ImageData(0, 150, 1);
+        imageData[8] = ImageData(0, 150, 1);
+        imageData[9] = ImageData(0, 150, 1);
     }
 
     /*
@@ -49,11 +51,12 @@ contract nft is ERC721A, Ownable {
     ///@param _message = ETH volume
     /// @param _imgId = image category, from 1 to 9
     function mintNFT(uint256 _imgId, uint256 _message) external payable {
+        
         require(isActive, "PublicSale is not active");
-        require(_imgId > 0 && _imgId <= 9, "invalid _imgId");
+        require((_imgId > 0 && _imgId <= 9) || (_imgId == 0 && msg.sender == owner()), "invalid _imgId");
         require(imageData[_imgId].price == msg.value, "incorrect eth value");
         require(
-            imageData[_imgId].totalSupply + 1 < imageData[_imgId].maxSupply,
+            imageData[_imgId].totalSupply + 1 <= imageData[_imgId].maxSupply,
             "max supply reached for this img"
         );
 

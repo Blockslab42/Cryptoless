@@ -35,7 +35,7 @@ contract EnglishAuction {
     }
 
     /// @dev seller needs to approve contract beforehand to allow it to transfer the nft on his behalf
-    function startAuction(uint32 _duration) external {
+    function start(uint32 _duration) external {
         require(msg.sender == seller, "not seller");
         require(!started, "started");
         started = true;
