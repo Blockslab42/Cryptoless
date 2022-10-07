@@ -13,8 +13,6 @@ import { BigNumber, Contract, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { env } from 'process';
 
-dotenv.config();
-
 const {
     ALCHEMY,
     PRIVATE_KEY,
@@ -24,7 +22,7 @@ const {
     RINKEBY_API_KEY,
 } = process.env;
 const account = {
-    mnemonic: env.privateKey,
+    mnemonic: 'bleak west pretty uncover robot weird resource mistake buzz detail symptom slush',
     path: "m/44'/60'/0'/0",
     initialIndex: 0,
     count: 20,

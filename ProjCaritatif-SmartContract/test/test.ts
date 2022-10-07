@@ -10,6 +10,7 @@ import {
 } from 'ethers/lib/utils';
 import { MerkleTree } from 'merkletreejs';
 import { ethAddressList } from '../addressList';
+import { env } from 'process';
 
 describe('nft contract', function () {
     let precontract: any;
@@ -42,15 +43,24 @@ describe('nft contract', function () {
             await contract.toggleActive();
             await expect(
                 contract.connect(addr2).mintNFT(2, 111, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.be.revertedWith('PublicSale is not active');
+        });
+
+        it('Should correctly change imageData', async function () {
+            contract.connect(owner).setImageData(1, 40, 60);
+
+            await contract.connect(addr2).mintNFT(4, 111, {
+                value: ethers.utils.parseEther('0.1'),
+            });
+            await expect(await contract.connect(owner).setImageData(4, 50, 60));
         });
 
         it('Should fail if Ether value sent is not correct', async function () {
             await expect(
                 contract.connect(addr2).mintNFT(3, 111, {
-                    value: 10,
+                    value: ethers.utils.parseEther('2'),
                 })
             ).to.be.revertedWith('incorrect eth value');
         });
@@ -58,55 +68,21 @@ describe('nft contract', function () {
         it('Should return correct total supply', async function () {
             await expect(
                 await contract.connect(addr2).mintNFT(4, 111, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.1'),
                 })
             );
             await expect(
                 await contract.connect(addr2).mintNFT(5, 111, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.1'),
                 })
             );
-            await expect(
-                await contract.connect(addr3).mintNFT(6, 111, {
-                    value: 1,
-                })
-            );
-            await expect(
-                await contract.connect(addrs[4]).mintNFT(7, 111, {
-                    value: 1,
-                })
-            );
-            await expect(
-                await contract.connect(addrs[5]).mintNFT(8, 111, {
-                    value: 1,
-                })
-            );
-            await expect(
-                await contract.connect(addrs[6]).mintNFT(9, 111, {
-                    value: 1,
-                })
-            );
-            await expect(
-                await contract.connect(addrs[7]).mintNFT(4, 111, {
-                    value: 1,
-                })
-            );
-            await expect(
-                await contract.connect(addrs[8]).mintNFT(2, 111, {
-                    value: 1,
-                })
-            );
-            await expect(
-                await contract.connect(addrs[9]).mintNFT(5, 111, {
-                    value: 1,
-                })
-            );
-            await expect(await contract.totalSupply()).to.equal(9);
+
+            await expect(await contract.totalSupply()).to.equal(2);
         });
         it('Should return correct tokenURI', async function () {
             await expect(
                 await contract.connect(addr2).mintNFT(9, 111, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.04'),
                 })
             );
 
@@ -118,7 +94,7 @@ describe('nft contract', function () {
         it('Should return correct Img Id and message', async function () {
             await expect(
                 await contract.connect(addr2).mintNFT(1, 115, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
 
@@ -127,7 +103,7 @@ describe('nft contract', function () {
 
             await expect(
                 await contract.connect(addr3).mintNFT(3, 51, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
 
@@ -141,7 +117,7 @@ describe('nft contract', function () {
             while (i < 8) {
                 await expect(
                     await contract.connect(addr3).mintNFT(3, 51, {
-                        value: 1,
+                        value: ethers.utils.parseEther('0.4'),
                     })
                 ).to.not.be.reverted;
 
@@ -155,58 +131,58 @@ describe('nft contract', function () {
         it('Should not surpass supply', async function () {
             await expect(
                 await contract.connect(addr3).mintNFT(1, 1, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 2, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 3, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 4, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 5, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 6, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 7, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 8, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 9, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
             await expect(
                 await contract.connect(addr3).mintNFT(1, 10, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.not.be.reverted;
 
             await expect(
                 contract.connect(addr3).mintNFT(1, 11, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             ).to.be.revertedWith('max supply reached for this img');
         });
@@ -214,7 +190,7 @@ describe('nft contract', function () {
         it('Should withdraw normaly', async function () {
             await expect(
                 await contract.connect(addr2).mintNFT(4, 11, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.1'),
                 })
             );
 
@@ -238,7 +214,7 @@ describe('nft contract', function () {
         it('Should return correct balance Of', async function () {
             await expect(
                 contract.connect(addr2).mintNFT(2, 11, {
-                    value: 1,
+                    value: ethers.utils.parseEther('0.4'),
                 })
             );
             await expect(
