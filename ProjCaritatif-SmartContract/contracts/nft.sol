@@ -41,10 +41,7 @@ contract nft is ERC721A, Ownable {
         imageData[9] = ImageData(0, 150, (ONE_ETH * 4) / 100);
     }
 
-    /*
-     * Function to mint new NFTs during the public sale
-     *
-     */
+    ///@dev Function to mint new NFTs during the public sale
     ///@param _message = ETH volume
     /// @param _imgId = image category, from 0 to 9
     function mintNFT(uint256 _imgId, uint256 _message) external payable {
@@ -69,9 +66,8 @@ contract nft is ERC721A, Ownable {
         imageData[_imgId].totalSupply++;
     }
 
-    /*
-     * Function to withdraw collected amount during minting by the owner
-     */
+    /// @dev Function to withdraw collected amount during minting by the owner
+
     function withdraw(address _to) public onlyOwner {
         require(address(this).balance > 0, "Balance should be more than zero");
         uint256 balance = address(this).balance;
@@ -114,16 +110,13 @@ contract nft is ERC721A, Ownable {
         }
     }
 
-    /*
-     * Function to set Base URI
-     */
+    /// @dev Function to set Base URI
+
     function setURI(string memory _URI) external onlyOwner {
         _contractBaseURI = _URI;
     }
 
-    /*
-     * Function toggleActive to activate/desactivate the smart contract
-     */
+    /// @dev Function toggleActive to activate/desactivate the smart contract
     function toggleActive() external onlyOwner {
         isActive = !isActive;
     }
