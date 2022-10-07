@@ -25,24 +25,24 @@ contract nft is ERC721A, Ownable {
     mapping(uint256 => uint256) public nftIdToImgId;
     ///@dev  message = eth volume (calculated in front-end)
     mapping(uint256 => uint256) public nftIdToMessage;
-    uint256 constant ONE_ETH  = 1000000000000000000; 
+    uint256 constant ONE_ETH = 1_000_000_000_000_000_000;
 
-    constructor() ERC721A("nft", "nft") Ownable() {
+    constructor() ERC721A("Cryptoless", "LESS") Ownable() {
         //fill img data
 
         //use ONE_ETH to define price in a readable fashion ?
         //add setters ? setImageData()
         imageData[0] = ImageData(0, 1, 0);
 
-        imageData[1] = ImageData(0, 10, (ONE_ETH*4)/10);
-        imageData[2] = ImageData(0, 10, (ONE_ETH*4)/10);
-        imageData[3] = ImageData(0, 10, (ONE_ETH*4)/10);
-        imageData[4] = ImageData(0, 40, ONE_ETH/10);
-        imageData[5] = ImageData(0, 40, ONE_ETH/10);
-        imageData[6] = ImageData(0, 40, ONE_ETH/10);
-        imageData[7] = ImageData(0, 150, (ONE_ETH*4)/100);
-        imageData[8] = ImageData(0, 150, (ONE_ETH*4)/100);
-        imageData[9] = ImageData(0, 150, (ONE_ETH*4)/100);
+        imageData[1] = ImageData(0, 10, (ONE_ETH * 4) / 10);
+        imageData[2] = ImageData(0, 10, (ONE_ETH * 4) / 10);
+        imageData[3] = ImageData(0, 10, (ONE_ETH * 4) / 10);
+        imageData[4] = ImageData(0, 40, ONE_ETH / 10);
+        imageData[5] = ImageData(0, 40, ONE_ETH / 10);
+        imageData[6] = ImageData(0, 40, ONE_ETH / 10);
+        imageData[7] = ImageData(0, 150, (ONE_ETH * 4) / 100);
+        imageData[8] = ImageData(0, 150, (ONE_ETH * 4) / 100);
+        imageData[9] = ImageData(0, 150, (ONE_ETH * 4) / 100);
     }
 
     /*
@@ -52,9 +52,12 @@ contract nft is ERC721A, Ownable {
     ///@param _message = ETH volume
     /// @param _imgId = image category, from 1 to 9
     function mintNFT(uint256 _imgId, uint256 _message) external payable {
-        
         require(isActive, "PublicSale is not active");
-        require((_imgId > 0 && _imgId <= 9) || (_imgId == 0 && msg.sender == owner()), "invalid _imgId");
+        require(
+            (_imgId > 0 && _imgId <= 9) ||
+                (_imgId == 0 && msg.sender == owner()),
+            "invalid _imgId"
+        );
         require(imageData[_imgId].price == msg.value, "incorrect eth value");
         require(
             imageData[_imgId].totalSupply + 1 <= imageData[_imgId].maxSupply,
@@ -62,7 +65,7 @@ contract nft is ERC721A, Ownable {
         );
 
         uint256 nextTokenId = _nextTokenId();
-       
+
         _safeMint(msg.sender, 1);
 
         nftIdToImgId[nextTokenId] = _imgId;
@@ -103,12 +106,14 @@ contract nft is ERC721A, Ownable {
                 : "";
     }
 
-    function setImageData(uint256 id, uint256 supply, uint256 price) external onlyOwner{
-        if (imageData[id].totalSupply > 0)
-        {
+    function setImageData(
+        uint256 id,
+        uint256 supply,
+        uint256 price
+    ) external onlyOwner {
+        if (imageData[id].totalSupply > 0) {
             imageData[id] = ImageData(imageData[id].totalSupply, supply, price);
-        }
-        else{
+        } else {
             imageData[id] = ImageData(0, supply, price);
         }
     }
