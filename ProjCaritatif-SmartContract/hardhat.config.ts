@@ -13,8 +13,6 @@ import { BigNumber, Contract, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { env } from 'process';
 
-dotenv.config();
-
 const {
     ALCHEMY,
     PRIVATE_KEY,
@@ -24,7 +22,7 @@ const {
     RINKEBY_API_KEY,
 } = process.env;
 const account = {
-    mnemonic: env.privateKey,
+    mnemonic: process.env.privateKey,
     path: "m/44'/60'/0'/0",
     initialIndex: 0,
     count: 20,
@@ -55,8 +53,7 @@ const config: HardhatUserConfig = {
             chainId: 1337,
         },
         rinkeby: {
-            url:
-                'https://rinkeby.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
+            url: 'https://rinkeby.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
             accounts: account,
         },
     },

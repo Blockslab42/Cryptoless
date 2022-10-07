@@ -25,6 +25,7 @@ contract nft is ERC721A, Ownable {
     mapping(uint256 => uint256) public nftIdToImgId;
     ///@dev  message = eth volume (calculated in front-end)
     mapping(uint256 => uint256) public nftIdToMessage;
+    uint256 constant ONE_ETH  = 1000000000000000000; 
 
     constructor() ERC721A("nft", "nft") Ownable() {
         //fill img data
@@ -33,15 +34,15 @@ contract nft is ERC721A, Ownable {
         //add setters ? setImageData()
         imageData[0] = ImageData(0, 1, 0);
 
-        imageData[1] = ImageData(0, 10, 1);
-        imageData[2] = ImageData(0, 10, 1);
-        imageData[3] = ImageData(0, 10, 1);
-        imageData[4] = ImageData(0, 40, 1);
-        imageData[5] = ImageData(0, 40, 1);
-        imageData[6] = ImageData(0, 40, 1);
-        imageData[7] = ImageData(0, 150, 1);
-        imageData[8] = ImageData(0, 150, 1);
-        imageData[9] = ImageData(0, 150, 1);
+        imageData[1] = ImageData(0, 10, (ONE_ETH*4)/10);
+        imageData[2] = ImageData(0, 10, (ONE_ETH*4)/10);
+        imageData[3] = ImageData(0, 10, (ONE_ETH*4)/10);
+        imageData[4] = ImageData(0, 40, ONE_ETH/10);
+        imageData[5] = ImageData(0, 40, ONE_ETH/10);
+        imageData[6] = ImageData(0, 40, ONE_ETH/10);
+        imageData[7] = ImageData(0, 150, (ONE_ETH*4)/100);
+        imageData[8] = ImageData(0, 150, (ONE_ETH*4)/100);
+        imageData[9] = ImageData(0, 150, (ONE_ETH*4)/100);
     }
 
     /*
@@ -100,6 +101,16 @@ contract nft is ERC721A, Ownable {
             bytes(baseURI).length != 0
                 ? string(abi.encodePacked(baseURI, _toString(imgId)))
                 : "";
+    }
+
+    function setImageData(uint256 id, uint256 supply, uint256 price) external onlyOwner{
+        if (imageData[id].totalSupply > 0)
+        {
+            imageData[id] = ImageData(imageData[id].totalSupply, supply, price);
+        }
+        else{
+            imageData[id] = ImageData(0, supply, price);
+        }
     }
 
     /*
