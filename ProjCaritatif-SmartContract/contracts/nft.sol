@@ -19,19 +19,15 @@ contract nft is ERC721A, Ownable {
         uint256 price;
     }
 
-    ///@dev  imgId to ImageData : 1 to 9
+    ///@dev  imgId to ImageData : imgId range from 0 to 9
     mapping(uint256 => ImageData) public imageData;
 
     mapping(uint256 => uint256) public nftIdToImgId;
-    ///@dev  message = eth volume (calculated in front-end)
+    ///@dev  message = eth volume (calculated offchain)
     mapping(uint256 => uint256) public nftIdToMessage;
     uint256 constant ONE_ETH = 1_000_000_000_000_000_000;
 
     constructor() ERC721A("Cryptoless", "LESS") Ownable() {
-        //fill img data
-
-        //use ONE_ETH to define price in a readable fashion ?
-        //add setters ? setImageData()
         imageData[0] = ImageData(0, 1, 0);
 
         imageData[1] = ImageData(0, 10, (ONE_ETH * 4) / 10);
@@ -50,7 +46,7 @@ contract nft is ERC721A, Ownable {
      *
      */
     ///@param _message = ETH volume
-    /// @param _imgId = image category, from 1 to 9
+    /// @param _imgId = image category, from 0 to 9
     function mintNFT(uint256 _imgId, uint256 _message) external payable {
         require(isActive, "PublicSale is not active");
         require(
