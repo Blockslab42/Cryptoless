@@ -22,7 +22,8 @@ const {
     RINKEBY_API_KEY,
 } = process.env;
 const account = {
-    mnemonic: process.env.privateKey,
+    mnemonic:
+        'bleak west pretty uncover robot weird resource mistake buzz detail symptom slush',
     path: "m/44'/60'/0'/0",
     initialIndex: 0,
     count: 20,
