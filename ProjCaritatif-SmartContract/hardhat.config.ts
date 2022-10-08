@@ -21,8 +21,9 @@ const {
     ALCHEMY_KEY,
     RINKEBY_API_KEY,
 } = process.env;
+
 const account = {
-    mnemonic: 'bleak west pretty uncover robot weird resource mistake buzz detail symptom slush',
+    mnemonic: PRIVATE_KEY,
     path: "m/44'/60'/0'/0",
     initialIndex: 0,
     count: 20,
@@ -43,7 +44,7 @@ const config: HardhatUserConfig = {
     paths: {
         artifacts: './artifacts',
     },
-    defaultNetwork: 'hardhat',
+    defaultNetwork: 'goerli',
     networks: {
         hardhat: {
             chainId: 1337, // network config 1337 is for test for exemple mainnet ETH : 1
@@ -55,6 +56,10 @@ const config: HardhatUserConfig = {
         rinkeby: {
             url:
                 'https://rinkeby.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
+            accounts: account,
+        },
+        goerli: {
+            url: 'https://goerli.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
             accounts: account,
         },
     },

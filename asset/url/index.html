@@ -1,0 +1,87 @@
+<style>
+    @font-face{
+    font-family: "Gameshow";
+    src: url('Gameshow.otf');
+    }
+    body{
+        margin: 0;
+    }
+    .image{
+        width: 100%;
+        position: absolute;
+    }
+    .text{ 
+        position: absolute;
+        color: white;
+        display: flex;
+        transform:translateX(-50%) scale(0.7);
+    }
+    p{ 
+        font-family: Gameshow;
+        font-size: 6vw;
+        margin: 0;
+    }
+    svg{
+        transform: translateY(-1px);
+        width: 2.5vw;
+    }
+</style>
+
+<html>
+    <head>
+    </head>
+    <body id="body">
+        <img id="imageId" class="image" src="">
+        <div id="textId" class="text">
+            <p class="valueClass" id="valueId"></p>
+            <svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52.08 85.93"><defs><style>.cls-1{fill:white;}</style></defs><path class="cls-1" d="M68.42,57V143H120.5V57Zm39.72,70.06H80.78v-7.49h27.36Zm0-23.36H80.78V96.26h27.36Zm0-23.35H80.78V72.9h27.36Z" transform="translate(-68.42 -57.04)"/></svg>
+        </div>
+    </body>
+</html>
+<script nonce="nonce-2726c7f26c">
+  const data = [ 
+    {img :"TheGoldenState.jpg", position:[{top: "21vw", left:"49vw"}]},
+    {img :"TheMJ23Fan.jpg", position:[{top: "28vw", left:"49vw"}]},
+    {img :"TheModel.jpg", position:[{top: "68vw", left:"49vw"}]},
+    {img :"TheArtist.jpg", position:[{top: "15vw", left:"60vw"}]}, 
+    {img :"TheSpiceGirls.jpg", position: [{top: "63vw", left:"70vw"},{top: "51vw", left:"44vw"}]},
+    {img :"ThePastor.jpg", position:[{top: "28vw", left:"54vw"}]},
+    {img :"TheDogSitter.jpg", position:[{top: "47vw", left:"36vw"}]},
+    {img :"TheHappyOne.jpg", position:[{top: "31vw", left:"52vw"}]},
+    {img :"TheMerchant.jpg", position:[{top: "80vw", left:"66vw"}]}, 
+    {img :"TheGrandpa.jpg", position:[{top: "52vw", left:"49vw"}]},
+   ];
+
+    var textArr = []
+  
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const IDIMAGE = urlParams.get('idImg');
+    const VALUEETH = urlParams.get('valueEth');
+
+    document.getElementById("imageId").src= data[IDIMAGE].img;
+
+    let i = 0
+    var text = document.getElementById("textId");
+    textArr.push(text)
+
+    while (i < data[IDIMAGE].position.length) {
+       if (i == 0)
+       {
+           text.style.top = data[IDIMAGE].position[i].top;
+           text.style.left = data[IDIMAGE].position[i].left;           
+       }
+       else{
+            var cloneText = text.cloneNode(true); 
+            textArr.push(cloneText)
+           document.getElementById("body").appendChild(cloneText);
+           cloneText.style.top = data[IDIMAGE].position[i].top;
+           cloneText.style.left = data[IDIMAGE].position[i].left;
+       }  
+       i++
+    }
+
+    textArr.map(e=> e.firstElementChild.innerHTML = VALUEETH)
+</script>
+
+
