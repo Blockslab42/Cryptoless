@@ -37,7 +37,6 @@ const account = {
     passphrase: '',
 };
 
-console.log('config', PRIVATE_KEY);
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
     solidity: {

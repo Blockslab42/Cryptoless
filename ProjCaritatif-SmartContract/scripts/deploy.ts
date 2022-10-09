@@ -37,15 +37,24 @@ async function main() {
     // await sleep(5000);
 }
 
-async function run(addr: string) {
+async function run() {
     const [deployer] = await ethers.getSigners();
-    const token = await ethers.getContractAt('nft', addr, deployer);
-    await token.toggleActive();
-    await token.approve(0, addr);
-    // await token.mintNFT(0, 111);
+    const token = await ethers.getContractAt(
+        'nft',
+        process.env.MAINNET_NFT as string,
+        deployer
+    );
+
+    //await token.toggleActive();
+    //await token.mintNFT(0, 13924);
+
+    //await token.toggleActive();
+
+    console.log(process.env.MAINNET_AUCTION);
+    await token.approve(process.env.MAINNET_AUCTION as string, 0);
 }
 
-main()
+run()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
