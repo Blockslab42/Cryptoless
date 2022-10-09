@@ -13,6 +13,10 @@ import { BigNumber, Contract, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { env } from 'process';
 
+import 'dotenv';
+
+dotenv.config();
+
 const {
     ALCHEMY,
     PRIVATE_KEY,
@@ -30,6 +34,7 @@ const account = {
     passphrase: '',
 };
 
+console.log('config', PRIVATE_KEY);
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
     solidity: {
@@ -59,7 +64,11 @@ const config: HardhatUserConfig = {
         },
         goerli: {
             url: 'https://goerli.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
-            accounts: account,
+            accounts: [PRIVATE_KEY as string],
+        },
+        mainnet: {
+            url: 'https://goerli.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
+            accounts: [PRIVATE_KEY as string],
         },
     },
     gasReporter: {
