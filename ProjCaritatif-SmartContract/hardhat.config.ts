@@ -23,7 +23,7 @@ const {
 } = process.env;
 const account = {
     mnemonic:
-        'bleak west pretty uncover robot weird resource mistake buzz detail symptom slush',
+        'badge battle night jacket chief flavor aspect borrow morning picture vehicle service',
     path: "m/44'/60'/0'/0",
     initialIndex: 0,
     count: 20,
@@ -55,6 +55,10 @@ const config: HardhatUserConfig = {
         },
         rinkeby: {
             url: 'https://rinkeby.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
+            accounts: account,
+        },
+        mainnet: {
+            url: 'https://eth-mainnet.nodereal.io/v1/1659dfb40aa24bbb8153a677b98064d7',
             accounts: account,
         },
     },
