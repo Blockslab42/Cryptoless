@@ -21,9 +21,9 @@ const {
     ALCHEMY_KEY,
     RINKEBY_API_KEY,
 } = process.env;
+
 const account = {
-    mnemonic:
-        'badge battle night jacket chief flavor aspect borrow morning picture vehicle service',
+    mnemonic: PRIVATE_KEY,
     path: "m/44'/60'/0'/0",
     initialIndex: 0,
     count: 20,
@@ -44,7 +44,7 @@ const config: HardhatUserConfig = {
     paths: {
         artifacts: './artifacts',
     },
-    defaultNetwork: 'hardhat',
+    defaultNetwork: 'goerli',
     networks: {
         hardhat: {
             chainId: 1337, // network config 1337 is for test for exemple mainnet ETH : 1
@@ -57,8 +57,8 @@ const config: HardhatUserConfig = {
             url: 'https://rinkeby.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
             accounts: account,
         },
-        mainnet: {
-            url: 'https://eth-mainnet.nodereal.io/v1/1659dfb40aa24bbb8153a677b98064d7',
+        goerli: {
+            url: 'https://goerli.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
             accounts: account,
         },
     },
