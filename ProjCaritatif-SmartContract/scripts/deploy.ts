@@ -12,20 +12,20 @@ async function main() {
 
     console.log('Account balance:', (await deployer.getBalance()).toString());
 
-    // const Token = await ethers.getContractFactory('nft');
-    // const token = await Token.deploy();
-    return;
+    const Token = await ethers.getContractFactory('nft');
+    const token = await Token.deploy();
+
     const Auction = await ethers.getContractFactory('EnglishAuction');
     const auction = await Auction.deploy(
         '0x5d17a277c4ee9a605cfad260e09799ead979e4fe',
         0,
-        100
+        ethers.utils.parseEther('1')
     );
 
     await auction.deployed();
 
-    // console.log('Token address:', token.address);
-    // console.log('Token address:', auction.address);
+    console.log('Token address:', token.address);
+    console.log('Token address:', auction.address);
 
     // await token.toggleActive();
     // await sleep(5000);
@@ -40,6 +40,7 @@ async function main() {
 async function run(addr: string) {
     const [deployer] = await ethers.getSigners();
     const token = await ethers.getContractAt('nft', addr, deployer);
+    await token.toggleActive();
     await token.approve(0, addr);
     // await token.mintNFT(0, 111);
 }

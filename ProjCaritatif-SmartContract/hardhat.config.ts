@@ -24,6 +24,9 @@ const {
     RINKEBY_URL,
     ALCHEMY_KEY,
     RINKEBY_API_KEY,
+    GOERLI_NODE,
+    RINKEBY_NODE,
+    MAINNET_NODE,
 } = process.env;
 
 const account = {
@@ -59,15 +62,15 @@ const config: HardhatUserConfig = {
             chainId: 1337,
         },
         rinkeby: {
-            url: 'https://rinkeby.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
+            url: RINKEBY_NODE,
             accounts: account,
         },
         goerli: {
-            url: 'https://goerli.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
+            url: GOERLI_NODE,
             accounts: [PRIVATE_KEY as string],
         },
         mainnet: {
-            url: 'https://eth-mainnet.nodereal.io/v1/1659dfb40aa24bbb8153a677b98064d7	',
+            url: MAINNET_NODE as string,
             accounts: [PRIVATE_KEY as string],
         },
     },
