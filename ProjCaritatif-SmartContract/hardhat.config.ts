@@ -67,7 +67,7 @@ const config: HardhatUserConfig = {
             accounts: [PRIVATE_KEY as string],
         },
         mainnet: {
-            url: 'https://goerli.infura.io/v3/3b9c944ca9d444be837d554e0db50d4d',
+            url: 'https://eth-mainnet.nodereal.io/v1/1659dfb40aa24bbb8153a677b98064d7	',
             accounts: [PRIVATE_KEY as string],
         },
     },

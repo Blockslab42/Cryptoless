@@ -26,7 +26,7 @@ contract nft is ERC721A, Ownable {
     mapping(uint256 => uint256) public nftIdToMessage;
     uint256 constant ONE_ETH = 1_000_000_000_000_000_000;
 
-    constructor() ERC721A("Cryptoless", "LESS") Ownable() {
+    constructor() ERC721A("Cryptoless", "Cryptoless") Ownable() {
         imageData[0] = ImageData(0, 1, 0);
 
         imageData[1] = ImageData(0, 10, (ONE_ETH * 4) / 10);
