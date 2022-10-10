@@ -7,23 +7,23 @@
         margin: 0;
     }
     .image{
-        width: 100%;
+        height: 100%;
         position: absolute;
     }
     .text{ 
         position: absolute;
         color: white;
         display: flex;
-        transform:translateX(-50%) scale(0.7);
+        transform:translateX(-50%) scale(0.5);
     }
     p{ 
         font-family: Gameshow;
-        font-size: 6vw;
+        font-size: 9vh;
         margin: 0;
     }
     svg{
         transform: translateY(-1px);
-        width: 2.5vw;
+        width: 4vh;
     }
 </style>
 
@@ -40,16 +40,16 @@
 </html>
 <script nonce="nonce-2726c7f26c">
   const data = [ 
-    {img :"TheGoldenState.jpg", position:[{top: "21vw", left:"49vw"}]},
-    {img :"TheMJ23Fan.jpg", position:[{top: "28vw", left:"49vw"}]},
-    {img :"TheModel.jpg", position:[{top: "68vw", left:"49vw"}]},
-    {img :"TheArtist.jpg", position:[{top: "15vw", left:"60vw"}]}, 
-    {img :"TheSpiceGirls.jpg", position: [{top: "63vw", left:"70vw"},{top: "51vw", left:"44vw"}]},
-    {img :"ThePastor.jpg", position:[{top: "28vw", left:"54vw"}]},
-    {img :"TheDogSitter.jpg", position:[{top: "47vw", left:"36vw"}]},
-    {img :"TheHappyOne.jpg", position:[{top: "31vw", left:"52vw"}]},
-    {img :"TheMerchant.jpg", position:[{top: "80vw", left:"66vw"}]}, 
-    {img :"TheGrandpa.jpg", position:[{top: "52vw", left:"49vw"}]},
+  {img :"TheGoldenState.jpg", position:[{top: "30vh", left:"73vh"}]},
+  {img :"TheDogSitter.jpg", position:[{top: "28vh", left:"23vh"}]},
+  {img :"TheHappyOne.jpg", position:[{top: "46vh", left:"77vh"}]},
+  {img :"TheGrandpa.jpg", position:[{top: "33vh", left:"33vh"}]},
+  {img :"TheSpiceGirls.jpg", position: [{top: "32vh", left:"30vh"},{top: "51vh", left:"44vh"}]},
+  {img :"ThePastor.jpg", position:[{top: "42vh", left:"80vh"}]},
+  {img :"TheMerchant.jpg", position:[{top: "51vh", left:"44vh"}]},
+  {img :"TheMJ23Fan.jpg", position:[{top: "40vh", left:"73vh"}]},
+  {img :"TheArtist.jpg", position:[{top: "21vh", left:"89vh"}]}, 
+  {img :"TheModel.jpg", position:[{top: "44vh", left:"33vh"}]},   
    ];
 
     var textArr = []
@@ -83,5 +83,4 @@
 
     textArr.map(e=> e.firstElementChild.innerHTML = VALUEETH)
 </script>
-
 
