@@ -93,7 +93,7 @@ contract nft is ERC721A, Ownable {
         string memory baseURI = _baseURI();
         return
             bytes(baseURI).length != 0
-                ? string(abi.encodePacked(baseURI, _toString(imgId)))
+                ? string(abi.encodePacked(baseURI, _toString(tokenId)))
                 : "";
     }
 

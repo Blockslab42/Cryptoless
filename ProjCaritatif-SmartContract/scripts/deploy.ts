@@ -3,7 +3,7 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -12,20 +12,20 @@ async function main() {
 
     console.log('Account balance:', (await deployer.getBalance()).toString());
 
-    const Token = await ethers.getContractFactory('nft');
-    const token = await Token.deploy();
+    // const Token = await ethers.getContractFactory('nft');
+    // const token = await Token.deploy();
 
     const Auction = await ethers.getContractFactory('EnglishAuction');
     const auction = await Auction.deploy(
-        '0x5d17a277c4ee9a605cfad260e09799ead979e4fe',
+        '0xB50ADEF3e840666ac2D122C386BB75C2d45217b3',
         0,
         ethers.utils.parseEther('1')
     );
 
     await auction.deployed();
 
-    console.log('Token address:', token.address);
-    console.log('Token address:', auction.address);
+    // console.log('Token address:', token.address);
+    console.log('Auction address:', auction.address);
 
     // await token.toggleActive();
     // await sleep(5000);
@@ -39,19 +39,26 @@ async function main() {
 
 async function run() {
     const [deployer] = await ethers.getSigners();
-    const token = await ethers.getContractAt(
-        'nft',
-        process.env.MAINNET_NFT as string,
+    // const token = await ethers.getContractAt(
+    //     'nft',
+    //     process.env.MAINNET_NFT as string,
+    //     deployer
+    // );
+    const EnglishA = await ethers.getContractAt(
+        'EnglishAuction',
+        process.env.MAINNET_AUCTION as string,
         deployer
     );
 
-    //await token.toggleActive();
-    //await token.mintNFT(0, 13924);
+    await EnglishA.start('604751');
+
+    // await token.toggleActive();
+    // await token.mintNFT(0, 13924);
 
     //await token.toggleActive();
 
-    console.log(process.env.MAINNET_AUCTION);
-    await token.approve(process.env.MAINNET_AUCTION as string, 0);
+    // console.log(process.env.MAINNET_AUCTION);
+    // await token.approve(process.env.MAINNET_AUCTION as string, 0);
 }
 
 run()

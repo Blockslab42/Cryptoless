@@ -1,8 +1,8 @@
 {
-    "name": "Cryptoless reveal",
-    "description": "Cryptoless reveal",
+    "name": "Cryptoless reveal 0",
+    "description": "you will be able to see your NFT in a few days",
     "image": "ipfs://QmYCpVmQsYWWVCZzDctvUHsFoKqCR3eVcWp1fiMBjGvH4L/reveal.png",
-    "animation_url":"ipfs://QmZVdCdJ8cBZd3x4bEknVwGnbxPoDEoH2jDusMEVVnr5tJ/index.html?id=0",
+    "animation_url":"ipfs://QmVyQ7rvRLsvS6FTSbkPct1AudBjcGDwhsCMxdTLZtZCPz/index.html?id=0",
     "animation_details": { "format": "HTML" },
     "edition": 0,
     "compiler": "ABRAXAS"

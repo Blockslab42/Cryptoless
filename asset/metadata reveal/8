@@ -1,7 +1,1 @@
-{
-    "name": "Cryptoless reveal",
-    "description": "Cryptoless reveal",
-    "image": "ipfs://QmYCpVmQsYWWVCZzDctvUHsFoKqCR3eVcWp1fiMBjGvH4L/reveal.png",
-    "edition": 8,
-    "compiler": "ABRAXAS"
-}
+{"name": "Cryptoless reveal 8","description": "you will be able to see your NFT in a few days","image": "ipfs://QmYCpVmQsYWWVCZzDctvUHsFoKqCR3eVcWp1fiMBjGvH4L/reveal.png","edition": 8,"compiler": "ABRAXAS"}

@@ -13,8 +13,8 @@ contract EnglishAuction {
     event Withdraw(address indexed bidder, uint256 amount);
     event End(address highestBidder, uint256 amount);
 
-    ERC721A public immutable nft;
-    uint256 public immutable nftId;
+    ERC721A public nft;
+    uint256 public nftId;
 
     address payable public immutable seller;
     uint32 public endAt;
@@ -88,4 +88,25 @@ contract EnglishAuction {
 
         emit End(highestBidder, highestBid);
     }
+
+    function setNFT(address _NFT) external {
+        require(msg.sender == seller, "not seller");
+        nft = ERC721A(_NFT);
+    }
+
+    function setNFTID(uint256 _NFTID) external {
+        require(msg.sender == seller, "not seller");
+        nftId = _NFTID;
+    }
+
+    function setHighestBid(uint256 _HBID) external {
+        require(msg.sender == seller, "not seller");
+        highestBid = _HBID;
+    }
+
+    function setEndAt(uint32 _duration) external {
+        require(msg.sender == seller, "not seller");
+        endAt = uint32(block.timestamp + _duration);
+    }
+    
 }

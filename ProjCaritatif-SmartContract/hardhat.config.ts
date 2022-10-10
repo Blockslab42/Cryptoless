@@ -12,6 +12,7 @@ import '@nomiclabs/hardhat-etherscan';
 import { BigNumber, Contract, ethers } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { env } from 'process';
+import '@openzeppelin/hardhat-upgrades';
 
 import 'dotenv';
 
@@ -51,7 +52,7 @@ const config: HardhatUserConfig = {
     paths: {
         artifacts: './artifacts',
     },
-    defaultNetwork: 'goerli',
+    defaultNetwork: 'mainnet',
     networks: {
         hardhat: {
             chainId: 1337, // network config 1337 is for test for exemple mainnet ETH : 1
