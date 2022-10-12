@@ -26,7 +26,7 @@ contract nftUpgradeable is ERC721Upgradeable, OwnableUpgradeable {
     mapping(uint256 => uint256) public nftIdToMessage;
     uint256 constant ONE_ETH = 1_000_000_000_000_000_000;
 
-    function __ERC721_init() internal initializer {
+    function __ERC721_init() public initializer {
         __Ownable_init();
 
         __ERC721_init("Cryptoless", "Cryptoless");

@@ -54,7 +54,7 @@ async function deployProxy() {
 async function runNft() {
     const [deployer] = await ethers.getSigners();
     const token = await ethers.getContractAt(
-        'nft',
+        'nftUpgradeable',
         process.env.NFT as string,
         deployer
     );
@@ -62,7 +62,9 @@ async function runNft() {
     //await token.toggleActive();
     //await token.mintNFT(0, 13924);
 
-    await token.toggleActive();
+    console.log('isActive', await token.isActive());
+
+    //await token.toggleActive();
 
     // console.log(process.env.AUCTION);
     // await token.approve(process.env.AUCTION as string, 0);
@@ -96,7 +98,7 @@ async function runAuction() {
     //await auction.end();
 }
 
-deployProxy()
+runNft()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
