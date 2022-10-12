@@ -51,6 +51,21 @@ async function deployProxy() {
     console.log('Token address:', token.address);
 }
 
+async function upgradeProxy() {
+    const [deployer] = await ethers.getSigners();
+
+    console.log('Deploying contracts with the account:', deployer.address);
+
+    console.log('Account balance:', (await deployer.getBalance()).toString());
+
+    const Token = await ethers.getContractFactory('nftUpgradeable');
+
+    const token = await upgrades.upgradeProxy(process.env.NFT as string, Token);
+
+    await token.deployed();
+    console.log('Token address:', token.address);
+}
+
 async function runNft() {
     const [deployer] = await ethers.getSigners();
     const token = await ethers.getContractAt(
@@ -63,6 +78,7 @@ async function runNft() {
     //await token.mintNFT(0, 13924);
 
     console.log('isActive', await token.isActive());
+    console.log('foo', await token.foo());
 
     //await token.toggleActive();
 
