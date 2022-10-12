@@ -55,7 +55,7 @@ async function runNft() {
     const [deployer] = await ethers.getSigners();
     const token = await ethers.getContractAt(
         'nft',
-        process.env.MAINNET_NFT as string,
+        process.env.NFT as string,
         deployer
     );
 
@@ -64,8 +64,8 @@ async function runNft() {
 
     await token.toggleActive();
 
-    // console.log(process.env.MAINNET_AUCTION);
-    // await token.approve(process.env.MAINNET_AUCTION as string, 0);
+    // console.log(process.env.AUCTION);
+    // await token.approve(process.env.AUCTION as string, 0);
 }
 
 async function deployAuction() {
@@ -73,7 +73,7 @@ async function deployAuction() {
 
     const Auction = await ethers.getContractFactory('EnglishAuction');
     const auction = await Auction.deploy(
-        process.env.MAINNET_NFT as string,
+        process.env.NFT as string,
         0,
         ethers.utils.parseEther('1')
     );
@@ -87,7 +87,7 @@ async function runAuction() {
     const [deployer] = await ethers.getSigners();
     const auction = await ethers.getContractAt(
         'EnglishAuction',
-        process.env.MAINNET_AUCTION as string,
+        process.env.AUCTION as string,
         deployer
     );
 
