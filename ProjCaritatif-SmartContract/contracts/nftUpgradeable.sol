@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.14;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "erc721a/contracts/ERC721A.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract nft is ERC721A, Ownable {
+contract nftUpgradeable is ERC721Upgradeable, OwnableUpgradeable {
     string public _contractBaseURI;
 
-    uint256 public maxPerWalletPresale = 6;
-    uint256 public maxPerTransaction = 10;
+    uint256 public maxPerWalletPresale;
+    uint256 public maxPerTransaction;
     bool public isActive;
     bytes32 public root;
 
@@ -26,7 +26,14 @@ contract nft is ERC721A, Ownable {
     mapping(uint256 => uint256) public nftIdToMessage;
     uint256 constant ONE_ETH = 1_000_000_000_000_000_000;
 
-    constructor() ERC721A("Cryptoless", "Cryptoless") Ownable() {
+    function __ERC721_init() internal initializer {
+        __Ownable_init();
+
+        __ERC721_init("Cryptoless", "Cryptoless");
+
+        maxPerWalletPresale = 6;
+        maxPerTransaction = 10;
+
         imageData[0] = ImageData(0, 1, 0);
 
         imageData[1] = ImageData(0, 10, (ONE_ETH * 4) / 10);
@@ -43,7 +50,11 @@ contract nft is ERC721A, Ownable {
     ///@dev Function to mint new NFTs during the public sale
     ///@param _message = ETH volume
     /// @param _imgId = image category, from 0 to 9
-    function mintNFT(uint256 _imgId, uint256 _message) external payable {
+    function mintNFT(
+        uint256 _imgId,
+        uint256 _message,
+        uint256 _tokenId
+    ) external payable {
         require(isActive, "PublicSale is not active");
         require(
             (_imgId > 0 && _imgId <= 9) ||
@@ -56,12 +67,10 @@ contract nft is ERC721A, Ownable {
             "max supply reached for this img"
         );
 
-        uint256 nextTokenId = _nextTokenId();
+        _safeMint(msg.sender, _tokenId);
 
-        _safeMint(msg.sender, 1);
-
-        nftIdToImgId[nextTokenId] = _imgId;
-        nftIdToMessage[nextTokenId] = _message;
+        nftIdToImgId[_tokenId] = _imgId;
+        nftIdToMessage[_tokenId] = _message;
         imageData[_imgId].totalSupply++;
     }
 
@@ -76,25 +85,6 @@ contract nft is ERC721A, Ownable {
 
     function _baseURI() internal view override returns (string memory) {
         return _contractBaseURI;
-    }
-
-    ///@dev returns base_uri + imgId instead of base_uri + nftId
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-
-        uint256 imgId = nftIdToImgId[tokenId];
-
-        string memory baseURI = _baseURI();
-        return
-            bytes(baseURI).length != 0
-                ? string(abi.encodePacked(baseURI, _toString(imgId)))
-                : "";
     }
 
     function setImageData(

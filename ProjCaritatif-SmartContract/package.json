@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
+    "@openzeppelin/contracts-upgradeable": "^4.8.0-rc.1",
     "@types/mocha": "^9.1.1",
     "dotenv": "^16.0.1",
     "erc721a": "^4.2.3",
